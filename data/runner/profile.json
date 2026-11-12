@@ -1,0 +1,47 @@
+{
+  "runner_id": "runner_01",
+  "description": "주 5회 훈련하는 직장인 마라톤 러너 (교육용 가짜 데이터)",
+  "training_days": [
+    "화",
+    "수",
+    "목",
+    "토",
+    "일"
+  ],
+  "rest_days": [
+    "월",
+    "금"
+  ],
+  "personal_records": {
+    "marathon": {
+      "time": "3:52:10",
+      "date": "2026-03-15"
+    },
+    "half_marathon": {
+      "time": "1:46:50",
+      "date": "2026-10-18"
+    },
+    "10k": {
+      "time": "48:40",
+      "date": "2026-05-10"
+    }
+  },
+  "heart_rate": {
+    "max_hr": 180,
+    "lactate_threshold_hr": 165,
+    "baseline_resting_hr": 52,
+    "zones": {
+      "zone1": "140 미만",
+      "zone2": "140~148",
+      "zone3": "149~156",
+      "zone4": "157~164",
+      "zone5": "165 이상"
+    }
+  },
+  "goal": {
+    "race": "풀코스 마라톤",
+    "race_date": "2027-03-14",
+    "target_time": "3:30:00",
+    "target_pace_per_km": "4:59"
+  }
+}

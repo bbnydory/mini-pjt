@@ -1,0 +1,354 @@
+{
+  "summary": [
+    {
+      "scenario": "tired",
+      "qid": "q1",
+      "decisions": [
+        "moved",
+        "replaced",
+        "replaced"
+      ],
+      "adjusted": 3,
+      "kept": 0,
+      "passed": true,
+      "g5_ok": true,
+      "cites_condition": 3
+    },
+    {
+      "scenario": "tired",
+      "qid": "q2",
+      "decisions": [
+        "replaced",
+        "replaced",
+        "replaced"
+      ],
+      "adjusted": 3,
+      "kept": 0,
+      "passed": true,
+      "g5_ok": true,
+      "cites_condition": 3
+    },
+    {
+      "scenario": "rested",
+      "qid": "q1",
+      "decisions": [
+        "keep",
+        "keep",
+        "keep"
+      ],
+      "adjusted": 0,
+      "kept": 3,
+      "passed": true,
+      "g5_ok": true,
+      "cites_condition": 3
+    },
+    {
+      "scenario": "rested",
+      "qid": "q2",
+      "decisions": [
+        "keep",
+        "keep",
+        "keep"
+      ],
+      "adjusted": 0,
+      "kept": 3,
+      "passed": true,
+      "g5_ok": true,
+      "cites_condition": 3
+    }
+  ],
+  "rows": [
+    {
+      "scenario": "tired",
+      "qid": "q1",
+      "run": 1,
+      "decision": "moved",
+      "cites_condition": true,
+      "reason": "수면 6시간 미만 3일 연속, 안정시 심박 평소보다 5회 이상 높음 3일 연속으로 인터벌을 목요일로 이동하거나 생략하라고 권장했으며, 권장안은 조정안 A(목요일로 이동)임",
+      "g5_status": "ok",
+      "weekly_totals_km": {
+        "1": 56.0
+      },
+      "tools": [
+        "get_coach_feedback",
+        "get_planned_workouts",
+        "get_weekly_summary",
+        "get_condition",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "check_week_plan",
+        "check_week_plan"
+      ],
+      "latency_s": 70.0,
+      "answer": "내일(11/10 화) 인터벌은 그대로 하면 안 됩니다.\n\n컨디션 신호가 3일 연속으로 두 가지 이상 겹쳐 있습니다.\n\n- 수면 6시간 미만: 11/06 5.4h → 11/07 5.0h → 11/08 5.2h (3일 연속)\n- 안정시 심박: 11/06 57bpm → 11/07 58bpm → 11/08 59bpm (평소 52bpm 대비 +7bpm, 3일 연속)\n\n원칙상 수면 6시간 미만이 2일 이상 이어지거나 안정시 심박이 평소보다 5회 이상 높으면 고강도 훈련은 쉬운 조깅으로 바꾸거나 미룹니다. 신호가 3일 이상 이어지면 주간 거리도 20~30% 줄입니다.\n\n아래 두 가지 조정안 중 하나를 선택하시면 됩니다.\n\n---\n\n**조정안 A — 인터벌을 목요일로 이동 (권장)**\n\n| 요일 | 훈련 | 거리 |\n|------|------|------|\n| 월 11/09 | 휴식 | 0km |\n| 화 11/10 | 쉬운 조깅 | 8km |\n| 수 11/11 | 조깅 | 8km |\n| 목 11/12 | 인터벌 (이동) | 10km |\n| 금 11/13 | 조깅 | 6km |\n| 토 11/14 | 조깅 | 6km |\n| 일 11/15 | 장거리주 | 18km |\n| **합계** | | **56km** / 한도 60.5km |\n\n인터벌(목)과 장거리주(일) 사이에 쉬운 날 2일(금·토)이 확보됩니다. 목요일 원래 템포런은 인터벌로 대체하고 생략합니다.\n\n---\n\n**조정안 B — 이번 주 인터벌 생략 (회복 우선)**\n\n| 요일 | 훈련 | 거리 |\n|------|------|------|\n| 월 11/09 | 휴식 | 0km |\n| 화 11/10 | 쉬운 조깅 | 8km |\n| 수 11/11 | 조깅 | 8km |\n| 목 11/12 | 쉬운 조깅 | 8km |\n| 금 11/13 | 휴식 | 0km |\n| 토 11/14 | 조깅 | 8km |\n| 일 11/15 | 장거리주 | 18km |\n| **합계** | | **50km** / 한도 60.5km |\n\n---\n\n목요일까지 안정시 심박이 평소(52bpm) 수준으로 돌아오고 수면이 회복되면 A안, 여전히 피로가 남아 있으면 B안을 선택하세요. 생략한 인터벌은 다음 주에 보충하지 않습니다.\n\n출처: `06_interval_vo2max.md`, `09_mileage_progression_overtraining.md`",
+      "error": ""
+    },
+    {
+      "scenario": "tired",
+      "qid": "q1",
+      "run": 2,
+      "decision": "replaced",
+      "cites_condition": true,
+      "reason": "수면 6시간 미만과 안정시 심박 기준 대비 5회 이상 상승이 3일 연속 동시에 나타나 인터벌을 쉬운 조깅으로 대체하고 이번 주 거리도 줄이는 것이 원칙에 맞다고 명시",
+      "g5_status": "ok",
+      "weekly_totals_km": {
+        "1": 44.0
+      },
+      "tools": [
+        "get_weekly_summary",
+        "get_planned_workouts",
+        "get_coach_feedback",
+        "get_condition",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "check_week_plan",
+        "check_week_plan"
+      ],
+      "latency_s": 69.6,
+      "answer": "내일(11/10 화) 인터벌은 그대로 하면 안 됩니다.\n\n**이유:** 수면 6시간 미만(5.4h → 5.0h → 5.2h)과 안정시 심박 기준 대비 5회 이상 상승(52bpm 기준 → 57→58→59bpm)이 3일 연속 동시에 나타나고 있습니다. 두 조정 기준이 모두 충족된 상태이며, 3일 이상 이어졌으므로 인터벌을 쉬운 조깅으로 대체하고 이번 주 거리도 줄이는 것이 원칙에 맞습니다.\n\n이번 주 조정안(권장: 안 B, 20% 감축)은 다음과 같습니다.\n\n| 요일 | 훈련 | 거리 |\n|------|------|------|\n| 월(오늘) | 휴식 | 0km |\n| 화 | 조깅 (인터벌 대체) | 5km |\n| 수 | 조깅 | 5km |\n| 목 | 템포런 | 10km |\n| 금 | 조깅 | 5km |\n| 토 | 조깅 | 5km |\n| 일 | 장거리주 | 14km |\n| **합계** | | **44km / 한도 60.5km** |\n\n- 인터벌은 이번 주 생략하며, 다음 주에 보충하지 않습니다. 컨디션이 회복되면 원래 계획으로 돌아가면 됩니다.\n- 목요일 템포런은 유지하되, 수요일까지 심박과 수면이 회복되지 않으면 그때 다시 판단하세요.\n\n출처: `06_interval_vo2max.md`, `09_mileage_progression_overtraining.md`",
+      "error": ""
+    },
+    {
+      "scenario": "tired",
+      "qid": "q1",
+      "run": 3,
+      "decision": "replaced",
+      "cites_condition": true,
+      "reason": "안정시 심박 +5bpm 이상 3일 연속, 수면 6시간 미만 3일 연속이라는 컨디션 수치를 근거로 인터벌을 쉬운 조깅 8km로 대체하라고 권장했다.",
+      "g5_status": "ok",
+      "weekly_totals_km": {
+        "1": 44.0
+      },
+      "tools": [
+        "get_condition",
+        "get_planned_workouts",
+        "get_weekly_summary",
+        "get_coach_feedback",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "check_week_plan"
+      ],
+      "latency_s": 60.9,
+      "answer": "내일(11/10 화) 인터벌은 그대로 하기 어렵습니다.\n\n**판단 근거**\n11/06~11/08 3일 연속으로 두 가지 컨디션 신호가 동시에 나타났습니다.\n- 안정시 심박: 평소 52bpm → 57·58·59bpm (+5bpm 이상, 3일 연속)\n- 수면: 5.4h · 5.0h · 5.2h (6시간 미만, 3일 연속)\n\n원칙상 두 신호가 3일 이상 겹치면 고강도 훈련을 쉬운 조깅으로 바꾸고, 이번 주 주간 거리를 20~30% 줄입니다.\n\n**이번 주 조정안**\n\n| 요일 | 훈련 | 거리 |\n|------|------|------|\n| 월 11/09 | 휴식 | 0km |\n| 화 11/10 | 쉬운 조깅 (인터벌 대체) | 8km |\n| 수 11/11 | 쉬운 조깅 | 8km |\n| 목 11/12 | 쉬운 조깅 (템포런 대체) | 8km |\n| 금 11/13 | 쉬운 조깅 | 6km |\n| 토 11/14 | 휴식 | 0km |\n| 일 11/15 | 장거리주 | 14km |\n| **합계** | | **44km** |\n\n주간 합계 44km / 한도 60.5km\n\n**추가로 알아두실 점**\n- 놓친 훈련은 한꺼번에 보충하지 않습니다. 지난주 장거리주(24km) 미수행분도 이번 주에 얹지 않습니다.\n- 쉬운 조깅은 페이스가 아니라 심박과 체감 강도에 맞춰 달리세요.\n- 컨디션이 회복되면 다음 주부터 원래 계획으로 돌아가면 됩니다. 줄인 거리를 몰아 보충할 필요는 없습니다.\n\n출처: 09_mileage_progression_overtraining.md, 08_periodization_weekly_structure.md",
+      "error": ""
+    },
+    {
+      "scenario": "tired",
+      "qid": "q2",
+      "run": 1,
+      "decision": "replaced",
+      "cites_condition": true,
+      "reason": "안정시 심박 3일 연속 +5bpm 이상, 수면 3일 연속 6시간 미만이라는 컨디션 신호를 근거로 화요일 인터벌 10km를 조깅(존2) 6km로 교체하라고 권장했다.",
+      "g5_status": "ok",
+      "weekly_totals_km": {
+        "1": 44.0
+      },
+      "tools": [
+        "get_planned_workouts",
+        "get_weekly_summary",
+        "get_coach_feedback",
+        "get_condition",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "check_week_plan"
+      ],
+      "latency_s": 72.9,
+      "answer": "이번 주 계획 점검 결과입니다.\n\n---\n\n**지난주 후반(11/06~11/08) 3일 연속으로 두 가지 컨디션 신호가 겹쳤습니다.** 이 때문에 이번 주 고강도 훈련을 조깅으로 교체하고 주간 거리를 줄이는 조정이 필요합니다.\n\n- 안정시 심박: 기준 52bpm → 11/06 57bpm, 11/07 58bpm, 11/08 59bpm (3일 연속 +5bpm 이상)\n- 수면: 11/06 5.4h, 11/07 5.0h, 11/08 5.2h (3일 연속 6시간 미만)\n\n---\n\n### 이번 주 조정안 (2026-11-09~11-15)\n\n| 요일 | 날짜 | 원래 계획 | 조정안 |\n|------|------|-----------|--------|\n| 월 | 11/09 | 휴식 | 휴식 |\n| 화 | 11/10 | 인터벌 10km | 조깅(존2) 6km |\n| 수 | 11/11 | 조깅(존2) 8km | 조깅(존2) 8km |\n| 목 | 11/12 | 템포런 10km | 조깅(존2) 6km |\n| 금 | 11/13 | 휴식 | 휴식 |\n| 토 | 11/14 | 조깅(존2) 6km | 조깅(존2) 6km |\n| 일 | 11/15 | 장거리주 26km | 장거리주 18km |\n| **합계** | | **60km** | **44km** |\n\n주간 거리 한도: 최근 4주 실제 최댓값 55km × 110% = **60.5km 이내**\n\n---\n\n**조정 포인트 3가지**\n\n1. **화(인터벌)·목(템포런) → 조깅(존2)으로 교체:** 컨디션 신호가 3일 이상 이어질 때 고강도 훈련은 쉬운 조깅으로 바꾸는 원칙을 적용했습니다.\n2. **주간 거리 20~30% 감축:** 신호 3일 이상 지속 시 주간 거리를 줄이는 원칙에 따라 60km → 44km(약 27% 감축)로 조정했습니다.\n3. **일요일 장거리주 26km → 18km:** 지난주 장거리주(24km)는 놓친 훈련이므로 한꺼번에 보충하지 않습니다. 이번 주는 컨디션 회복이 우선이므로 거리를 줄였습니다. 컨디션이 돌아오면 다음 주부터 보충 없이 원래 계획으로 복귀하면 됩니다.\n\n조깅은 페이스가 아닌 심박과 체감 강도 기준으로 뛰세요. 안정시 심박이 아직 높다면 평소보다 느리게 느껴져도 괜찮습니다.\n\n출처: `09_mileage_progression_overtraining.md`, `08_periodization_weekly_structure.md`, `03_long_run.md`",
+      "error": ""
+    },
+    {
+      "scenario": "tired",
+      "qid": "q2",
+      "run": 2,
+      "decision": "replaced",
+      "cites_condition": true,
+      "reason": "안정시 심박 +5~7bpm, 수면 5.0~5.4h 신호가 3일 이상 겹쳤을 때 고강도 훈련을 조깅으로 바꾸는 원칙에 따라 인터벌 10km를 조깅(존2) 6km로 교체",
+      "g5_status": "ok",
+      "weekly_totals_km": {
+        "1": 46.0
+      },
+      "tools": [
+        "get_condition",
+        "get_planned_workouts",
+        "get_weekly_summary",
+        "get_coach_feedback",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "check_week_plan"
+      ],
+      "latency_s": 69.3,
+      "answer": "이번 주 조정안입니다.\n\n---\n\n**결론: 고강도 훈련 2회를 조깅으로 교체하고, 주간 거리를 60km → 46km로 줄입니다.**\n\n컨디션 신호가 3일 연속 겹쳤기 때문입니다. 11/06~11/08 사흘 동안 안정시 심박이 평소 52bpm보다 5~7bpm 높은 57~59bpm을 기록했고, 수면은 5.0h·5.4h·5.2h로 3일 연속 6시간 미만이었습니다. 이 두 신호가 3일 이상 이어지면 주간 거리를 20~30% 줄이는 것이 원칙입니다.\n\n---\n\n### 이번 주 조정안 (2026-11-09~11-15)\n\n| 요일 | 원래 계획 | 조정안 | 변경 내용 |\n|------|-----------|--------|-----------|\n| 월 11/09 | 휴식 | 휴식 | 유지 |\n| 화 11/10 | 인터벌 10km | 조깅(존2) 6km | 고강도 → 조깅 교체 |\n| 수 11/11 | 조깅(존2) 8km | 조깅(존2) 6km | 거리 소폭 축소 |\n| 목 11/12 | 템포런 10km | 조깅(존2) 6km | 고강도 → 조깅 교체 |\n| 금 11/13 | 휴식 | 휴식 | 유지 |\n| 토 11/14 | 조깅(존2) 6km | 조깅(존2) 6km | 유지 |\n| 일 11/15 | 장거리주 26km | 장거리주 22km | 거리 축소 |\n| **합계** | **60km** | **46km** | 한도 60.5km 이내 |\n\n---\n\n**주요 사항 세 가지**\n\n1. **인터벌·템포런 생략** — 컨디션 신호(안정시 심박 +5~7bpm, 수면 5.0~5.4h)가 3일 이상 겹쳤을 때 고강도 훈련을 조깅으로 바꾸는 원칙에 따른 것입니다.\n2. **장거리주 22km** — 지난주 놓친 장거리주 24km는 한꺼번에 보충하지 않습니다. 이번 주 컨디션 감축에 맞춰 22km로 조정했습니다.\n3. **다음 주 복귀** — 컨디션이 회복되면 줄인 거리를 더해 보충하지 않고 원래 계획으로 돌아갑니다.\n\n조깅 날은 페이스보다 심박과 체감 강도에 맞춰 달리세요.\n\n출처: `09_mileage_progression_overtraining.md`, `08_periodization_weekly_structure.md`",
+      "error": ""
+    },
+    {
+      "scenario": "tired",
+      "qid": "q2",
+      "run": 3,
+      "decision": "replaced",
+      "cites_condition": true,
+      "reason": "안정시 심박 +5~7bpm 상승과 3일 연속 수면 6시간 미만을 근거로 인터벌 10km를 조깅 6km로 대체했다.",
+      "g5_status": "ok",
+      "weekly_totals_km": {
+        "1": 48.0
+      },
+      "tools": [
+        "get_condition",
+        "get_coach_feedback",
+        "get_planned_workouts",
+        "get_weekly_summary",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "check_week_plan"
+      ],
+      "latency_s": 65.8,
+      "answer": "이번 주 조정안입니다.\n\n---\n\n## 이번 주 조정안 (2026-11-09~11-15)\n\n| 요일 | 날짜 | 훈련 | 거리 | 변경 |\n|------|------|------|------|------|\n| 월 | 11/09 | 휴식 | 0km | 유지 |\n| 화 | 11/10 | 조깅(존2) | 6km | 인터벌 10km → 조깅 6km |\n| 수 | 11/11 | 조깅(존2) | 6km | 조깅 8km → 6km |\n| 목 | 11/12 | 조깅(존2) | 8km | 템포런 10km → 조깅 8km |\n| 금 | 11/13 | 휴식 | 0km | 추가 휴식일 |\n| 토 | 11/14 | 조깅(존2) | 6km | 유지 |\n| 일 | 11/15 | 장거리주 | 22km | 26km → 22km |\n| **합계** | | | **48km** | 한도 60.5km 이내 |\n\n---\n\n**조정 근거**\n\n지난 금(11/06)·토(11/07)·일(11/08) **3일 연속**으로 두 가지 컨디션 신호가 겹쳤습니다.\n\n- 안정시 심박: 평소 52bpm → 57·58·59bpm (+5~7bpm)\n- 수면: 5.4h → 5.0h → 5.2h (3일 연속 6시간 미만)\n\n신호가 3일 이상 이어질 때는 휴식일을 하루 추가하고 주간 거리를 20~30% 줄이는 것이 원칙입니다. 이에 따라 고강도 훈련(인터벌·템포런)을 조깅으로 대체하고, 금요일 휴식일을 추가했습니다. 주간 거리는 60km → 48km로 20% 감축했습니다.\n\n**장거리주(일요일)** 는 지난주 24km를 놓쳤으나, 놓친 훈련은 한꺼번에 보충하지 않는 것이 원칙입니다. 최근 실제 완료한 가장 긴 거리가 22km(11/01)이므로, 이번 주 컨디션 회복 중임을 감안해 22km로 조정했습니다. 컨디션이 돌아오면 다음 주 장거리주에서 2~3km 늘리면 됩니다.\n\n**조깅 페이스** 는 수면 부족·누적 피로 상태에서 같은 페이스에도 심박이 높게 나오므로, 페이스가 아닌 심박과 체감 강도를 기준으로 삼고 존2 범위를 지키세요.\n\n출처: `09_mileage_progression_overtraining.md`, `03_long_run.md`, `08_periodization_weekly_structure.md`, `01_heart_rate_zones.md`",
+      "error": ""
+    },
+    {
+      "scenario": "rested",
+      "qid": "q1",
+      "run": 1,
+      "decision": "keep",
+      "cites_condition": true,
+      "reason": "안정시 심박 평균 51.7bpm(평소 52bpm), 수면 평균 7.6시간, 평균 피로도 2.0/5로 조정이 필요한 신호가 없어 계획대로 진행 권장",
+      "g5_status": "no_plan",
+      "weekly_totals_km": {},
+      "tools": [
+        "get_planned_workouts",
+        "get_weekly_summary",
+        "get_coach_feedback",
+        "get_condition",
+        "retrieve_training_docs",
+        "retrieve_training_docs"
+      ],
+      "latency_s": 34.8,
+      "answer": "내일(11/10 화) 인터벌은 **계획대로 진행해도 됩니다.**\n\n컨디션 수치를 보면, 최근 7일(11/03~11/08) 안정시 심박 평균이 51.7bpm으로 평소(52bpm)와 거의 같고, 수면 6시간 미만인 날이 0일, 평균 수면 7.6시간, 평균 피로도 2.0/5로 조정이 필요한 신호가 없습니다.\n\n지난주 일요일 장거리주(24km)를 놓쳤지만, 놓친 훈련은 한꺼번에 보충하지 않는 것이 원칙이며, 이를 이유로 인터벌 강도를 낮추지 않습니다.\n\n출처: `06_interval_vo2max.md`, `09_mileage_progression_overtraining.md`, `08_periodization_weekly_structure.md`",
+      "error": ""
+    },
+    {
+      "scenario": "rested",
+      "qid": "q1",
+      "run": 2,
+      "decision": "keep",
+      "cites_condition": true,
+      "reason": "안정시 심박 51.7bpm 정상, 수면 6시간 미만 0일, 피로도 2.0/5로 컨디션 신호가 없어 강도를 낮출 이유가 없다고 명시했으며, 계획대로 하라고 권장함",
+      "g5_status": "no_plan",
+      "weekly_totals_km": {},
+      "tools": [
+        "get_planned_workouts",
+        "get_weekly_summary",
+        "get_coach_feedback",
+        "get_condition",
+        "check_week_plan"
+      ],
+      "latency_s": 31.0,
+      "answer": "내일 인터벌, 계획대로 하셔도 됩니다.\n\n**강도:** 안정시 심박 51.7bpm(기준 52bpm)으로 정상, 수면 6시간 미만 0일, 피로도 2.0/5로 컨디션 신호가 없어 강도를 낮출 이유가 없습니다.\n\n**거리:** 지난주 장거리주를 빠뜨려 실제 34km에 그쳤지만, 주간 거리 한도는 최근 4주 최대치(55km) 기준 60.5km입니다. 이번 주 계획 합계 60km는 한도 이내입니다.\n\n내일 훈련 내용은 워밍업 3km → 1000m×5회(사이 400m 조깅 회복) → 쿨다운 2km, 총 10km입니다.",
+      "error": ""
+    },
+    {
+      "scenario": "rested",
+      "qid": "q1",
+      "run": 3,
+      "decision": "keep",
+      "cites_condition": true,
+      "reason": "안정시 심박, 수면, 피로도 수치를 확인한 결과 조정 기준에 해당하지 않아 계획대로 인터벌을 진행하라고 권장함",
+      "g5_status": "ok",
+      "weekly_totals_km": {
+        "1": 10.0
+      },
+      "tools": [
+        "get_planned_workouts",
+        "get_coach_feedback",
+        "get_weekly_summary",
+        "get_condition",
+        "retrieve_training_docs",
+        "retrieve_training_docs"
+      ],
+      "latency_s": 38.9,
+      "answer": "내일(11/10 화) 인터벌, 계획대로 해도 됩니다.\n\n컨디션 수치를 확인했을 때 조정 기준에 해당하는 신호가 없습니다.\n\n- 안정시 심박: 최근 7일 평균 51.7 bpm (평소 기준 52 bpm, 기준치 +5 미만)\n- 수면: 최근 7일 평균 7.6시간, 6시간 미만인 날 0일\n- 주관적 피로도: 평균 2.0 / 5\n\n고강도 훈련(인터벌)을 낮추거나 바꾸는 기준은 수면 6시간 미만 2일 이상, 또는 안정시 심박 평소보다 5회 이상 높음인데, 두 조건 모두 해당하지 않습니다.\n\n지난주 일요일 장거리주(24km)를 놓쳤지만, 놓친 훈련은 한꺼번에 보충하지 않는 것이 원칙입니다. 이를 이유로 인터벌 강도를 낮출 필요는 없습니다.\n\n내일 훈련 내용: 워밍업 3km + 1000m×5회(휴식 400m 조깅) + 쿨다운 2km (총 10.0km)\n\n출처: `06_interval_vo2max.md`, `09_mileage_progression_overtraining.md`",
+      "error": ""
+    },
+    {
+      "scenario": "rested",
+      "qid": "q2",
+      "run": 1,
+      "decision": "keep",
+      "cites_condition": true,
+      "reason": "컨디션 양호(안정시 심박 평균 51.7bpm, 수면 평균 7.5시간)로 고강도 훈련을 조정할 신호가 없어 화요일 인터벌을 계획대로 유지하라고 명시함",
+      "g5_status": "no_plan",
+      "weekly_totals_km": {},
+      "tools": [
+        "get_planned_workouts",
+        "get_coach_feedback",
+        "get_condition",
+        "get_weekly_summary",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "check_week_plan"
+      ],
+      "latency_s": 71.5,
+      "answer": "이번 주 계획은 그대로 진행하면 됩니다. 바꿀 항목은 없습니다.\n\n---\n\n### 이번 주 확정 계획 (2026-11-09~11-15)\n\n| 요일 | 훈련 | 거리 |\n|------|------|------|\n| 월 11/09 | 휴식 | 0km |\n| 화 11/10 | 인터벌 — 워밍업 3km + 1000m×5 (휴식 400m 조깅) + 쿨다운 2km | 10.0km |\n| 수 11/11 | 조깅 — 존2 심박 | 8.0km |\n| 목 11/12 | 템포런 — 워밍업 3km + 젖산역치 페이스 25분 + 쿨다운 2km | 10.0km |\n| 금 11/13 | 휴식 | 0km |\n| 토 11/14 | 조깅 — 존2 심박 | 6.0km |\n| 일 11/15 | 장거리주 — 마라톤 페이스보다 km당 30~60초 느리게 | 26.0km |\n\n**주간 합계 60.0km / 한도 60.5km** (최근 4주 실제 최대 55.0km × 110%)\n\n---\n\n**점검 결과 요약**\n\n- **컨디션 양호** — 최근 7일(11/02~11/08) 안정시 심박 평균 51.7bpm(기준치 52bpm 이하), 수면 평균 7.5시간, 수면 6시간 미만 0일. 고강도 훈련을 조정할 컨디션 신호가 없습니다.\n- **주간 거리 한도 이내** — 60.0km는 한도 60.5km 안에 들어옵니다.\n- **지난주 장거리주(24km) 미수행** — 놓친 훈련은 한꺼번에 보충하지 않습니다. 이번 주 장거리주는 원래 계획대로 26km를 유지합니다.\n- **고강도 배치(화 인터벌 → 수 조깅 → 목 템포런)** — 고강도 사이에 쉬운 날 1일이 확보되어 원칙을 충족합니다.\n- **장거리주 전날(토) 조깅** — 존2 쉬운 날로 배치되어 있어 원칙에 맞습니다.\n\n일요일 장거리주 후 다음 주 월요일은 반드시 휴식 또는 가벼운 움직임으로 두세요.\n\n출처: `08_periodization_weekly_structure.md`, `03_long_run.md`, `09_mileage_progression_overtraining.md`",
+      "error": ""
+    },
+    {
+      "scenario": "rested",
+      "qid": "q2",
+      "run": 2,
+      "decision": "keep",
+      "cites_condition": true,
+      "reason": "최근 7일 컨디션(안정시 심박 평균 51.7bpm, 수면 평균 7.5시간, 피로도 2.0/5)에 이상 신호가 없으므로 인터벌을 그대로 유지한다고 명시함",
+      "g5_status": "ok",
+      "weekly_totals_km": {
+        "1": 59.0
+      },
+      "tools": [
+        "get_planned_workouts",
+        "get_weekly_summary",
+        "get_condition",
+        "get_coach_feedback",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "check_week_plan"
+      ],
+      "latency_s": 77.5,
+      "answer": "이번 주 계획 점검 결과입니다.\n\n**바꿀 곳은 일요일 장거리주 한 곳입니다. 26km → 25km로 줄입니다.**\n\n---\n\n### 이번 주 계획 (2026-11-09~11-15)\n\n| 요일 | 종류 | 거리 | 변경 |\n|------|------|------|------|\n| 월 11/09 | 휴식 | — | 유지 |\n| 화 11/10 | 인터벌 | 10.0km | 유지 |\n| 수 11/11 | 조깅(존2) | 8.0km | 유지 |\n| 목 11/12 | 템포런 | 10.0km | 유지 |\n| 금 11/13 | 휴식 | — | 유지 |\n| 토 11/14 | 조깅(존2) | 6.0km | 유지 |\n| 일 11/15 | 장거리주 | **25.0km** | 26→25km |\n\n**주간 합계 59.0km / 한도 60.5km**\n\n---\n\n**장거리주 조정 근거**\n지난주 일요일 장거리주(24km)를 놓쳤습니다. 놓친 훈련은 한꺼번에 보충하지 않으며, 이번 장거리주는 직전에 실제로 완료한 최장 거리(22km)에서 2~3km 늘린 24~25km가 적정합니다. 계획의 26km는 이 범위를 1km 초과하므로 25km로 조정합니다.\n\n**인터벌·템포런은 그대로 유지합니다.** 최근 7일 컨디션(안정시 심박 평균 51.7bpm, 평소 52bpm과 동일 수준 / 수면 평균 7.5시간 / 피로도 2.0/5)에 이상 신호가 없으므로 강도를 낮출 근거가 없습니다.\n\n출처: `03_long_run.md`, `08_periodization_weekly_structure.md`, `09_mileage_progression_overtraining.md`",
+      "error": ""
+    },
+    {
+      "scenario": "rested",
+      "qid": "q2",
+      "run": 3,
+      "decision": "keep",
+      "cites_condition": true,
+      "reason": "최근 7일 평균 안정시 심박 51.7bpm(평소 52bpm 대비 정상), 평균 수면 7.5시간으로 고강도 훈련을 낮출 조건에 해당하지 않아 인터벌을 계획대로 유지한다고 명시함",
+      "g5_status": "no_plan",
+      "weekly_totals_km": {},
+      "tools": [
+        "get_coach_feedback",
+        "get_planned_workouts",
+        "get_weekly_summary",
+        "get_condition",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "retrieve_training_docs",
+        "check_week_plan"
+      ],
+      "latency_s": 74.0,
+      "answer": "이번 주 계획은 그대로 진행하면 됩니다.\n\n---\n\n**이번 주 훈련 계획 (2026-11-09~11-15)**\n\n| 날짜 | 요일 | 훈련 | 거리 |\n|------|------|------|------|\n| 11-09 | 월 | 휴식 | — |\n| 11-10 | 화 | 인터벌 | 10.0km |\n| 11-11 | 수 | 조깅 | 8.0km |\n| 11-12 | 목 | 템포런 | 10.0km |\n| 11-13 | 금 | 휴식 | — |\n| 11-14 | 토 | 조깅 | 6.0km |\n| 11-15 | 일 | 장거리주 | 26.0km |\n\n**주간 합계 60.0km / 한도 60.5km**\n\n---\n\n**바꾸지 않는 이유**\n\n- **컨디션 이상 없음**: 최근 7일(11/02~11/08) 평균 안정시 심박 51.7bpm(평소 52bpm 대비 정상), 평균 수면 7.5시간, 수면 6시간 미만인 날 0일. 고강도 훈련을 낮출 조건에 해당하지 않아 인터벌(화)·템포런(목) 모두 계획대로 유지합니다.\n- **주간 거리 한도 이내**: 최근 4주 실제 주간 거리 최댓값 55.0km의 110%인 60.5km 이내(60.0km)입니다.\n- **지난주 놓친 장거리주**: 놓친 훈련은 한꺼번에 보충하지 않습니다. 이번 주 일요일 장거리주는 원래 계획(26.0km)대로 진행합니다.\n- **주간 구성 적절**: 고강도(화·목) 사이에 쉬운 조깅(수)이 있고, 장거리주(일) 전날은 쉬운 조깅(토)으로 배치되어 있습니다.\n\n출처: `08_periodization_weekly_structure.md`, `09_mileage_progression_overtraining.md`, `03_long_run.md`, `05_lactate_threshold.md`, `06_interval_vo2max.md`",
+      "error": ""
+    }
+  ]
+}

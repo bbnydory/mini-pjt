@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TEMPO 설명서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  /* microsoft.com 홈페이지 느낌: 흰 바탕과 회색(#F2F2F2) 띠, 검은 제목, 파란(#0067B8) 사각 버튼, 거의 각진 모서리, 그림자로 카드 구분.
+     글꼴은 도현·주아 제목 그대로. 코드 서랍은 VS Code Dark+ 색 */
+  :root {
+    --yellow:#0067B8; --yellow-soft:#EBF3FC; --ink:#242424; --brown:#005A9E; --title:"Do Hyeon","Noto Sans KR",sans-serif; --fun:"Jua","Noto Sans KR",sans-serif; --sub:#616161; --faint:#A19F9D;
+    --bg:#F2F2F2; --card:#FFFFFF; --line:#ECECEC; --chat:#F0F0F0; --blue:#0067B8; --red:#C50F1F; --green:#107C10;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font:15.5px/1.7 "Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif; }
+  a { color:inherit; }
+  code { background:#F1F1F1; border-radius:4px; padding:1px 6px; font-size:13.5px; font-family:Consolas,"Cascadia Mono",monospace; }
+
+  /* 상단 */
+  .hero { background:#fff; padding:64px 0 56px; color:var(--ink); border-bottom:1px solid #E1DFDD; }
+  .wrap { width:100%; max-width:none; margin:0; padding-left:clamp(16px,3vw,56px); padding-right:clamp(16px,3vw,56px); }
+  .tag { display:inline-block; background:var(--yellow); color:#fff; font-family:var(--fun); font-weight:700; font-size:13px; border-radius:2px; padding:4px 12px; }
+  .hero h1 { font-family:var(--title); font-size:clamp(44px,8vw,76px); font-weight:400; margin:14px 0 6px; letter-spacing:-.03em; color:#000; }
+  .hero p.lead { font-family:var(--fun); font-size:clamp(18px,2.6vw,23px); margin:0; color:#505050; max-width:900px; }
+  .cta { display:flex; flex-wrap:wrap; gap:14px; align-items:center; margin-top:26px; }
+  .cta a { text-decoration:none; font-family:var(--fun); font-size:16px; }
+  .cta .primary { background:var(--yellow); color:#fff; padding:11px 22px; border-radius:2px; }
+  .cta .primary:hover { background:var(--brown); }
+  .cta .more { color:var(--yellow); }
+  .cta .more:hover { text-decoration:underline; }
+  .hero .pills { display:flex; flex-wrap:wrap; gap:8px; margin-top:22px; }
+  .hero .pills span { background:#F2F2F2; color:#242424; font-family:var(--fun); font-weight:400; border-radius:2px; padding:6px 14px; font-size:14px; font-weight:700; }
+
+  /* 목차 */
+  nav.toc { position:sticky; top:0; z-index:5; background:rgba(255,255,255,.96); border-bottom:1px solid var(--line); backdrop-filter:blur(6px); }
+  nav.toc .wrap { display:flex; gap:6px; overflow-x:auto; padding-top:10px; padding-bottom:10px; scrollbar-width:none; }
+  nav.toc a { white-space:nowrap; text-decoration:none; font-size:14px; font-weight:700; color:var(--sub); padding:6px 12px; border-radius:2px; }
+  nav.toc a { font-family:var(--fun); font-weight:400; font-size:15px; }
+  nav.toc a:hover { color:var(--yellow); text-decoration:underline; text-underline-offset:4px; }
+
+  main.wrap { padding-top:32px; padding-bottom:80px; display:flex; flex-direction:column; gap:22px; }
+  section.card { background:var(--card); border-radius:4px; padding:30px 30px 32px; box-shadow:0 1.6px 3.6px rgba(0,0,0,.13), 0 .3px .9px rgba(0,0,0,.11); scroll-margin-top:64px; }
+  .num { display:inline-grid; place-items:center; width:30px; height:30px; border-radius:50%; background:var(--yellow); color:#fff; font-family:var(--title); font-size:17px; margin-right:10px; vertical-align:2px; }
+  h2 { font-family:var(--title); font-size:30px; font-weight:400; margin:0 0 6px; letter-spacing:-.02em; }
+  .desc { color:var(--sub); margin:0 0 20px; }
+  h3 { font-family:var(--fun); font-weight:400; font-size:19px; margin:22px 0 8px; }
+
+  /* 말풍선 (카톡 대화방) */
+  .room { background:var(--chat); border-radius:4px; padding:20px 18px; display:flex; flex-direction:column; gap:12px; }
+  .row { display:flex; gap:8px; align-items:flex-start; }
+  .row.me { justify-content:flex-end; }
+  .av { width:38px; height:38px; border-radius:4px; background:var(--yellow); color:#fff; display:grid; place-items:center; font-family:var(--title); font-size:18px; flex:none; }
+  .who { font-size:12.5px; color:#4b5b6b; margin-bottom:3px; }
+  .bubble { background:#fff; border:1px solid #E0E0E0; border-radius:4px 4px 4px 4px; padding:10px 14px; max-width:620px; font-size:14.5px; }
+  .me .bubble { background:var(--yellow); color:#fff; border:0; border-radius:4px 4px 4px 4px; }
+  .bubble b { font-weight:700; }
+  .bubble small { color:var(--sub); }
+
+  /* 숫자 카드 */
+  .stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .stat { background:var(--bg); border-radius:4px; padding:16px 18px; }
+  .stat b { display:block; font-family:var(--title); font-size:36px; font-weight:400; line-height:1.2; }
+  .stat span { color:var(--sub); font-size:13.5px; }
+  .stat.y { background:var(--yellow); color:#fff; }
+  .stat.y span { color:#fff; }
+
+  /* 그림 */
+  .diagram { background:#FCFCFC; border:1px solid var(--line); border-radius:4px; padding:18px; overflow-x:auto; text-align:center; }
+  .diagram .mermaid { min-width:640px; }
+  .cap { font-size:13px; color:var(--faint); margin-top:8px; text-align:center; }
+
+  /* 카드 그리드 */
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:12px; }
+  .box { border:1px solid var(--line); border-radius:4px; padding:16px 18px; }
+  .box .h { display:flex; align-items:center; gap:8px; font-family:var(--fun); font-weight:400; font-size:18px; margin-bottom:6px; }
+  .box .h i { font-style:normal; font-size:20px; }
+  .box p { margin:0 0 8px; color:#333; font-size:14.5px; }
+  .chips { display:flex; flex-wrap:wrap; gap:5px; }
+  .chips code { background:var(--yellow-soft); }
+
+  /* 단계 */
+  ol.steps { list-style:none; counter-reset:s; padding:0; margin:0; display:flex; flex-direction:column; gap:10px; }
+  ol.steps li { counter-increment:s; background:var(--bg); border-radius:4px; padding:12px 16px 12px 56px; position:relative; font-size:14.5px; }
+  ol.steps li::before { content:counter(s); position:absolute; left:14px; top:12px; width:28px; height:28px; border-radius:50%;
+    background:var(--yellow); color:#fff; display:grid; place-items:center; font-family:var(--title); font-size:16px; }
+  ol.steps li b { display:block; font-size:15px; }
+
+  /* 표 */
+  .tw { overflow-x:auto; }
+  table { width:100%; border-collapse:separate; border-spacing:0; font-size:14.5px; min-width:560px; }
+  th { background:var(--yellow); color:#fff; text-align:left; padding:10px 14px; font-family:var(--fun); font-weight:400; font-size:15.5px; }
+  th:first-child { border-radius:4px 0 0 4px; } th:last-child { border-radius:0 4px 4px 0; }
+  td { padding:11px 14px; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:last-child td { border-bottom:0; }
+  .ok { color:var(--green); font-weight:700; } .no { color:var(--red); font-weight:700; } .wait { color:var(--blue); font-weight:700; }
+
+  .note { background:var(--yellow-soft); border-radius:4px; padding:14px 18px; font-size:14.5px; margin-top:16px; }
+  .note b { color:var(--brown); }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:760px) { .two { grid-template-columns:1fr; } section.card { padding:22px 18px 24px; border-radius:4px; } }
+  pre.tree { background:#1E1E1E; color:#f3f3f3; border-radius:4px; padding:16px 18px; font-size:13.5px; line-height:1.65; overflow-x:auto; margin:0; }
+  pre.tree em { color:var(--yellow); font-style:normal; }
+  footer { text-align:center; color:var(--faint); font-size:13px; padding:0 20px 40px; }
+
+  /* ---------- 상단 애니메이션: 트랙 위를 달리는 러너 ---------- */
+  .hero { position:relative; overflow:hidden; }
+  .track { position:relative; height:34px; margin-top:26px; border-bottom:3px dashed #C8C6C4; }
+  .track .runner { position:absolute; bottom:2px; left:-40px; font-size:28px; transform:scaleX(-1); animation:run 9s linear infinite; }
+  .track .flag { position:absolute; right:0; bottom:4px; font-size:22px; }
+  @keyframes run { from { left:-40px; } to { left:calc(100% - 40px); } }
+
+  /* ---------- 등장 애니메이션 ---------- */
+  .reveal { opacity:0; transform:translateY(18px); transition:opacity .6s ease, transform .6s ease; }
+  .reveal.in { opacity:1; transform:none; }
+
+  /* ---------- 인터랙티브 아키텍처 ---------- */
+  body { overflow-x:clip; }
+  .arch-bar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:12px; }
+  .seg { display:flex; background:var(--bg); border-radius:2px; padding:4px; gap:2px; }
+  .seg button { border:0; background:none; border-radius:2px; padding:6px 14px; font:inherit; font-family:var(--fun); font-size:15px; color:var(--sub); cursor:pointer; }
+  .seg button.on { background:#fff; color:var(--brown); box-shadow:0 1px 3px rgba(0,0,0,.12); }
+  .play { border:0; background:var(--yellow); color:#fff; border-radius:2px; padding:8px 18px; font-family:var(--fun); font-size:16px; cursor:pointer; }
+  .play.ghost { background:#fff; color:var(--sub); border:1px solid var(--line); }
+  .stepcap { flex:1 1 280px; min-height:24px; font-size:14.5px; color:var(--brown); }
+  .stepcap b { font-family:var(--title); font-weight:400; font-size:17px; margin-right:6px; color:var(--yellow); }
+  .arch-body { display:block; }
+  .scrim { position:fixed; inset:0; background:rgba(0,0,0,.38); opacity:0; pointer-events:none; transition:opacity .3s; z-index:40; }
+  .scrim.open { opacity:1; pointer-events:auto; }
+  .canvas-wrap { position:relative; background:linear-gradient(180deg,#FDFDFD,#F3F6FA); border:1px solid var(--line); border-radius:4px; overflow:hidden; }
+  .canvas { position:absolute; left:0; top:0; width:1000px; height:720px; transform-origin:0 0; }
+  .canvas svg { position:absolute; inset:0; width:1000px; height:720px; overflow:visible; }
+  .edge { fill:none; stroke:#A6C8EC; stroke-width:2.2; }
+  .edge.dash { stroke-dasharray:6 6; }
+  .edge.flow { stroke:var(--yellow); stroke-width:3; stroke-dasharray:7 7; animation:flow .8s linear infinite; }
+  .edge.hot { stroke:var(--yellow); stroke-width:3.4; }
+  @keyframes flow { to { stroke-dashoffset:-14; } }
+  .elabel { font-size:12px; fill:var(--sub); paint-order:stroke; stroke:#F7F9FC; stroke-width:5px; stroke-linejoin:round; }
+  .dot { fill:var(--yellow); stroke:#fff; stroke-width:3; filter:drop-shadow(0 0 6px rgba(0,103,184,.8)); }
+  .canvas .node { position:absolute; width:160px; height:70px; background:#fff; border:2px solid #D6E4F5; border-radius:4px; padding:8px 10px 8px 46px;
+    cursor:pointer; text-align:left; font:inherit; transition:transform .2s, box-shadow .2s, border-color .2s; }
+  .canvas .node:hover { transform:translateY(-2px); box-shadow:0 6px 16px rgba(0,0,0,.12); }
+  .canvas .node .ic { position:absolute; left:9px; top:50%; margin-top:-15px; width:30px; height:30px; border-radius:4px; background:var(--yellow-soft);
+    display:grid; place-items:center; font-size:17px; }
+  .canvas .node b { display:block; font-family:var(--title); font-weight:400; font-size:16.5px; line-height:1.15; color:var(--ink); }
+  .canvas .node span { display:block; font-size:11.5px; color:var(--sub); line-height:1.3; margin-top:3px; }
+  .canvas .node.sel { border-color:var(--yellow); box-shadow:0 0 0 4px rgba(0,103,184,.18); }
+  .canvas .node.live { border-color:var(--yellow); animation:pulse 1.1s ease-in-out infinite; }
+  .canvas .node.dim { opacity:.35; }
+  .canvas .node.ext { border-style:dashed; }
+  @keyframes pulse { 0%,100% { box-shadow:0 0 0 0 rgba(0,103,184,.45); } 50% { box-shadow:0 0 0 12px rgba(0,103,184,0); } }
+  .codepane { position:fixed; top:0; right:0; bottom:0; width:min(900px, 94vw); z-index:41; background:#252526; color:#D4D4D4;
+    border-radius:4px 0 0 4px; padding:22px 26px 18px; display:flex; flex-direction:column; box-shadow:-12px 0 40px rgba(0,0,0,.25);
+    transform:translateX(105%); transition:transform .38s cubic-bezier(.2,.8,.2,1); visibility:hidden; }
+  .codepane.open { transform:none; visibility:visible; }
+  .codepane { overflow:hidden; overscroll-behavior:contain; }
+  #codebox { flex:1; min-height:0; display:flex; flex-direction:column; }
+  .codepane pre { min-height:0 !important; overscroll-behavior:contain; }
+  html.locked, html.locked body { overflow:hidden; }
+  .codepane .x { position:absolute; top:16px; right:18px; width:38px; height:38px; border-radius:50%; border:0; background:#333333; color:#fff; font-size:18px; cursor:pointer; }
+  .codepane .x:hover { background:var(--yellow); }
+  .codepane .k { font-family:var(--fun); font-size:13px; color:#9CDCFE; }
+  .codepane h3 { font-family:var(--title); font-weight:400; font-size:30px; margin:2px 0 6px; color:#fff; }
+  .codepane p { margin:0 0 12px; max-width:760px; font-size:15px; color:#CCCCCC; line-height:1.65; }
+  .codepane .tabs { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; }
+  .codepane .tabs button { border:1px solid #3C3C3C; background:none; color:#CCCCCC; border-radius:4px; padding:5px 11px; font:13.5px Consolas,"Cascadia Mono",monospace; cursor:pointer; }
+  .codepane .tabs button.on { background:var(--yellow); border-color:var(--yellow); color:#FFFFFF; }
+  .codepane .where { font:12.5px Consolas,"Cascadia Mono",monospace; color:#9D9D9D; margin-bottom:6px; display:flex; justify-content:space-between; gap:8px; }
+  .codepane .where a { color:#9CDCFE; }
+  .codepane pre { margin:0; flex:1; min-height:200px; overflow:auto; background:#1E1E1E; border-radius:4px; padding:10px 0; font:14px/1.7 Consolas,"Cascadia Mono",monospace; }
+  .codepane pre .ln { display:block; padding:0 12px 0 0; white-space:pre; }
+  .codepane pre .ln::before { content:attr(data-n); display:inline-block; width:52px; padding-right:16px; text-align:right; color:#858585; user-select:none; }
+  .codepane .cut { font-size:12px; color:#9D9D9D; margin-top:6px; }
+  .codepane.flash { animation:none; }
+  .stepcap .peek { border:0; background:none; color:var(--brown); text-decoration:underline; font:inherit; cursor:pointer; margin-left:6px; }
+  @keyframes flash { from { box-shadow:0 0 0 4px rgba(0,103,184,.6); } to { box-shadow:none; } }
+  .tk-c { color:#6A9955; font-style:italic; } .tk-s { color:#CE9178; } .tk-k { color:#569CD6; font-weight:700; }
+  .tk-n { color:#B5CEA8; } .tk-d { color:#C586C0; } .tk-f { color:#DCDCAA; }
+  .legend2 { display:flex; flex-wrap:wrap; gap:14px; font-size:12.5px; color:var(--sub); margin-top:10px; }
+  .legend2 i { display:inline-block; width:22px; height:0; border-top:2.4px solid #A6C8EC; vertical-align:middle; margin-right:6px; }
+  .legend2 i.d { border-top-style:dashed; }
+  @media (prefers-reduced-motion:reduce) {
+    .track .runner, .edge.flow, .canvas .node.live, .codepane.flash { animation:none; }
+    .codepane, .scrim { transition:none; }
+    .reveal { opacity:1; transform:none; transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="tag">Samsung SDS AX 과정 · 미니 프로젝트</span>
+    <h1>TEMPO 설명서</h1>
+    <p class="lead">계획표대로 못 뛴 한 주, 컨디션까지 보고 "이번 주를 어떻게 바꿔 뛸지" 알려 주는 마라톤 훈련 조정 코치</p>
+    <div class="cta"><a class="primary" href="#arch">구조 살펴보기</a><a class="more" href="#new">새 기능 보기 ›</a><a class="more" href="#eval">평가 방법 ›</a></div>
+    <div class="pills"><span>🏃 Agentic RAG</span><span>👥 Supervisor + 담당 3명</span><span>🔌 MCP</span><span>🛡️ 가드레일 6개</span><span>📊 인-아웃 18건 + RAGAS</span><span>✋ 승인(HITL)</span><span>🧠 장기 메모리</span><span>🖼️ 이미지·영상 입력</span></div>
+    <div class="track" aria-hidden="true"><span class="runner">🏃</span><span class="flag">🏁</span></div>
+  </div>
+</header>
+
+<nav class="toc"><div class="wrap">
+  <a href="#why">왜 만들었나</a><a href="#arch">전체 구조</a><a href="#flow">질문 한 번의 흐름</a><a href="#agents">담당 에이전트</a>
+  <a href="#rag">문서 검색(RAG)</a><a href="#guard">가드레일</a><a href="#ui">화면</a><a href="#new">승인·기억·이미지·영상</a><a href="#eval">평가</a>
+  <a href="#days">Day 1~7 패턴</a><a href="#lessons">시행착오</a><a href="#files">폴더·실행</a><a href="#api">API</a>
+</div></nav>
+
+<main class="wrap">
+
+  <!-- 1 -->
+  <section class="card" id="why">
+    <h2><span class="num">1</span>왜 만들었나</h2>
+    <p class="desc">정해진 훈련 계획표는 야근, 수면 부족, 놓친 훈련을 반영하지 못합니다. 그래서 매주 혼자 감으로 계획을 고치다 실수합니다.</p>
+    <div class="room">
+      <div class="row me"><div class="bubble">지난주 일요일 장거리를 못 뛰었어. 이번 주 계획을 어떻게 조정하면 좋을까?</div></div>
+      <div class="row"><div class="av">T</div><div>
+        <div class="who">코치 TEMPO</div>
+        <div class="bubble">
+          <b>① 내 기록 수치</b> — 지난주 계획 58km 중 34km 수행, 최근 3일 안정시 심박 57~59(평소 52), 수면 5시간대<br>
+          <b>② 이론 근거와 출처</b> — "놓친 훈련은 한꺼번에 보충하지 않는다" <small>(03_long_run.md, 09_mileage…md)</small><br>
+          <b>③ 요일별 조정안</b> — 화요일 인터벌을 가볍게 바꾸고 주간 합계를 한도 60.5km 안으로<br>
+          <small>✔ 주간 거리 한도는 모델이 아니라 코드가 검사합니다</small>
+        </div></div></div>
+    </div>
+    <div class="note"><b>핵심 가치</b> — 질문 한 번에 "내 수치 + 근거 문서 + 요일별 조정안" 세 가지를 같이 받는다. 안전 규칙(주간 거리 한도)은 코드로 강제한다.</div>
+    <h3>숫자로 보는 프로젝트</h3>
+    <div class="stats">
+      <div class="stat y"><b>3 + 1</b><span>담당 에이전트 3명 + Supervisor</span></div>
+      <div class="stat"><b>9개</b><span>도구 (MCP 6 + RAG 1 + 계산 2)</span></div>
+      <div class="stat"><b>12종</b><span>직접 쓴 훈련 이론 문서 → 72개 조각</span></div>
+      <div class="stat"><b>6개</b><span>가드레일 규칙 G1~G6</span></div>
+      <div class="stat"><b>18건</b><span>인-아웃 평가 세트</span></div>
+      <div class="stat y"><b>18/18</b><span>2차 평가 통과 (1차 10/18, 목표 15/18)</span></div>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="card" id="arch">
+    <h2><span class="num">2</span>전체 구조</h2>
+    <p class="desc">상자를 누르면 오른쪽에서 그 부분의 <b>실제 코드</b>가 크게 펼쳐집니다 (파일 이름과 줄 번호 포함, Esc 나 바깥을 누르면 닫힘). <b>▶ 요청 흐름 재생</b>을 누르면 질문 하나가 어떤 순서로 지나가는지 점이 따라가며 단계를 설명하고, 단계마다 "코드 보기"로 그 코드를 펼칠 수 있습니다.</p>
+    <div class="arch-bar">
+      <div class="seg" role="group" aria-label="재생할 시나리오">
+        <button data-sc="plan" class="on">📅 계획 조정 질문</button>
+        <button data-sc="image">🖼️ 기록 캡처 첨부</button>
+        <button data-sc="blocked">🛡️ 가드레일 차단</button>
+      </div>
+      <button class="play" id="play">▶ 요청 흐름 재생</button>
+      <button class="play ghost" id="stop" hidden>■ 멈춤</button>
+      <div class="stepcap" id="stepcap" aria-live="polite">상자를 눌러 코드를 보거나, 시나리오를 골라 재생해 보세요.</div>
+    </div>
+    <div class="arch-body">
+      <div>
+        <div class="canvas-wrap" id="canvasWrap"><div class="canvas" id="canvas"><svg id="edges" aria-hidden="true"></svg></div></div>
+        <div class="legend2"><span><i></i>요청이 지나가는 길</span><span><i class="d"></i>선택적으로 지나가는 길</span><span>점선 상자: 실행 환경(모델 선택)</span></div>
+      </div>
+    </div>
+    <p class="cap">기준일은 2026-11-09로 고정 (가짜 데이터가 고정이라 "오늘"도 고정)</p>
+    <div class="tw" style="margin-top:16px"><table>
+      <tr><th>쓰는 곳</th><th>모델 (모두 Amazon Bedrock)</th></tr>
+      <tr><td>에이전트 (Supervisor, 담당 3명)</td><td><code>claude-sonnet-4-6</code></td></tr>
+      <tr><td>답변 속 주간 계획 추출 (출력 가드레일)</td><td><code>claude-haiku-4-5</code> — 작고 빠른 모델</td></tr>
+      <tr><td>평가 심사 · RAGAS 채점</td><td><code>claude-sonnet-4-5</code> — 에이전트와 다른 모델</td></tr>
+      <tr><td>문서 임베딩</td><td><code>titan-embed-text-v2</code></td></tr>
+    </table></div>
+    <div class="note"><b>모델·리전 선택</b> — Bedrock 일일 토큰 한도는 모델·리전마다 따로 찹니다. 채팅 위 선택 상자에서 Claude·Nova·gpt-oss 13종과 us-east-1·us-west-2 중 고를 수 있고, 한도가 차면 "다른 모델이나 리전을 고르라"는 안내(429)가 나옵니다. 평가 스크립트도 <code>--model</code>·<code>--region</code>으로 바꿉니다.</div>
+  </section>
+
+  <!-- 3 -->
+  <section class="card" id="flow">
+    <h2><span class="num">3</span>질문 한 번이 처리되는 흐름</h2>
+    <p class="desc">"지난주 일요일 장거리를 못 뛰었어" 질문을 따라가 봅니다. 담당은 반드시 한 명씩 차례로 부릅니다.</p>
+    <div class="diagram"><pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor U as 사용자
+  participant G as 입력 가드레일
+  participant S as Supervisor
+  participant D as data_agent
+  participant T as theory_agent
+  participant P as plan_agent
+  participant O as 출력 가드레일
+  U->>G: 장거리 못 뛰었어, 이번 주 조정해줘
+  G->>S: 통과 (의료·인젝션·타인 아님)
+  S->>D: 계획표 · 주간 집계 · 최근 7일 컨디션 조회
+  D-->>S: 지난주 34km, 심박 57~59, 수면 5시간대
+  S->>T: 놓친 장거리 처리 원칙 검색
+  T-->>S: 문서 조각 + 출처 (03_long_run 등)
+  S->>P: 조정안 작성 (한도 60.5km)
+  P->>P: check_week_plan 으로 합계 검사
+  P-->>S: 요일별 조정안 (한도 이내)
+  S->>O: 최종 답변
+  O->>O: 계획 구조화 추출 → 합계 재검사
+  O-->>U: answer + contexts + trace + 승인 요청
+  U->>O: 승인 (POST /approve)
+  O-->>U: 주간 계획에 반영
+</pre></div>
+    <p class="cap">복합 질문은 보통 50~75초. 실행 기록(trace)에 어느 담당이 어떤 도구를 불렀는지 남습니다</p>
+  </section>
+
+  <!-- 4 -->
+  <section class="card" id="agents">
+    <h2><span class="num">4</span>담당 에이전트와 도구</h2>
+    <p class="desc">사람 코치 팀처럼 역할을 나눴습니다. 각 담당은 질문 전체가 아니라 "자기 몫"만 하고 보고합니다.</p>
+    <div class="grid">
+      <div class="box"><div class="h"><i>🧭</i>Supervisor</div><p>질문을 보고 누구에게 맡길지 정하고, 결과를 모아 최종 답변을 씁니다. 직접 지어내지 않고, 요일별 계획도 직접 쓰지 않습니다.</p>
+        <div class="chips"><code>langgraph-supervisor</code></div></div>
+      <div class="box"><div class="h"><i>📈</i>data_agent · 기록 담당</div><p>MCP 서버에서 러너 데이터를 조회합니다. 일수·합계는 도구가 계산한 값만 씁니다.</p>
+        <div class="chips"><code>get_runner_profile</code><code>get_planned_workouts</code><code>get_activities</code><code>get_weekly_summary</code><code>get_condition</code><code>get_coach_feedback</code></div></div>
+      <div class="box"><div class="h"><i>📚</i>theory_agent · 이론 담당</div><p>훈련 이론 문서를 검색해 근거와 출처를 줍니다. 검색해 보지 않고 "자료에 없다"고 하지 않습니다.</p>
+        <div class="chips"><code>retrieve_training_docs</code></div></div>
+      <div class="box"><div class="h"><i>🗓️</i>plan_agent · 계획 담당</div><p>페이스를 환산하고 주간 계획을 짭니다. 계획은 한도 검사를 통과한 것만 내보냅니다.</p>
+        <div class="chips"><code>calc_pace</code><code>check_week_plan</code></div></div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="card" id="rag">
+    <h2><span class="num">5</span>문서 검색 (RAG)</h2>
+    <p class="desc">직접 쓴 훈련 이론 문서 13종(심박존, 장거리주, 인터벌, 테이퍼링, 회복, 러닝 자세 등)을 소제목 단위로 잘라 검색합니다.</p>
+    <div class="diagram"><pre class="mermaid">
+flowchart LR
+  A["📄 문서 13종<br/>data/docs/*.md"] --> B["✂️ 소제목(##) 단위 청킹<br/>72개 조각"]
+  B --> C["🔢 Titan 임베딩"] --> E[("Chroma 벡터 DB")]
+  B --> F[("BM25 키워드<br/>kiwipiepy 형태소")]
+  Q(["질문"]) --> H{"하이브리드 검색<br/>벡터 + 키워드, 상위 4개"}
+  E --> H
+  F --> H
+  H --> X["📎 문서 단위 확장<br/>한 문서에서 2개 이상 잡히면<br/>그 문서 나머지 소제목도 추가 (최대 8개)"]
+  X --> Y(["근거 조각 + doc_id"])
+</pre></div>
+    <div class="note"><b>왜 "문서 단위 확장"을 넣었나</b> — "테이퍼링은 어떻게 줄여야 해?"에 꼭 필요한 "강도는 유지한다" 조각이 검색 개수를 늘려도, 하이브리드로 바꿔도 안 잡혔습니다. "줄이다"와 "유지한다"는 단어도 의미도 안 겹치기 때문입니다. 그래서 문서 하나의 주제 전체를 묻는 경우 그 문서를 통째로 붙이도록 했습니다.</div>
+  </section>
+
+  <!-- 6 -->
+  <section class="card" id="guard">
+    <h2><span class="num">6</span>가드레일 (안전 규칙)</h2>
+    <p class="desc">입력 단계 3개는 모델을 부르기 전에 규칙으로 막고, 출력 단계의 거리 한도는 코드가 계산해서 막습니다.</p>
+    <div class="tw"><table>
+      <tr><th>번호</th><th>규칙</th><th>어디서 · 어떻게</th><th>평가 케이스</th></tr>
+      <tr><td><b>G1</b></td><td>통증·증상 진단, 약 안내 안 함 → 진료 권유</td><td>입력 · 정규식 → 고정 문구</td><td>15</td></tr>
+      <tr><td><b>G2</b></td><td>문서·기록에 없는 건 지어내지 않음, 출처 표기</td><td>프롬프트 + 이론 담당 검색 의무</td><td>11, 13</td></tr>
+      <tr><td><b>G3</b></td><td>"지시 무시해", 시스템 프롬프트 노출 요청 거절</td><td>입력 · 정규식 → 고정 문구</td><td>16</td></tr>
+      <tr><td><b>G4</b></td><td>본인 외 타인 기록·건강정보 제공 안 함</td><td>입력 · 정규식 → 고정 문구</td><td>17</td></tr>
+      <tr><td><b>G6</b></td><td>러닝과 무관한 이미지는 분석하지 않고 러닝 이미지만 올려 달라고 안내</td><td>이미지 판독 직후 · 종류 구조화 판정 → 고정 문구 (신체 부위 사진은 G1)</td><td>세트 밖</td></tr>
+      <tr><td><b>G5</b></td><td>주간 거리 ≤ 최근 4주 최댓값 × 110% (55 × 1.1 = <b>60.5km</b>)</td><td>계획 담당 도구 검사 + 출력 단계 구조화 추출(LCEL + Pydantic) 후 코드 검사 → 1회 고쳐 쓰기 → 그래도 넘으면 차단</td><td>7, 14, 18</td></tr>
+    </table></div>
+  </section>
+
+  <!-- 7 -->
+  <section class="card" id="ui">
+    <h2><span class="num">7</span>화면</h2>
+    <p class="desc">데스크톱 3단 화면입니다. 훈련 카드를 누르면 그 훈련을 주제로 바로 묻고, 답변을 그날의 코치 피드백으로 저장합니다.</p>
+    <div class="grid">
+      <div class="box"><div class="h"><i>💬</i>왼쪽 · 코치 채팅</div><p>질문과 답변이 대화로 쌓입니다. 답변마다 가드레일 결과, 부른 담당, 근거 문서, 실행 과정을 펼쳐 볼 수 있습니다.</p></div>
+      <div class="box"><div class="h"><i>📅</i>가운데 · 주간 훈련</div><p>주 이동, 계획/실제 거리, 수행 횟수, 주간 한도. 카드마다 강도(존) 색 막대가 붙습니다.</p></div>
+      <div class="box"><div class="h"><i>🔍</i>오른쪽 · 선택한 날</div><p>그날 기록과 컨디션(기준을 넘으면 빨간색), 저장된 코치 피드백 목록.</p></div>
+    </div>
+    <div class="diagram" style="margin-top:14px"><pre class="mermaid">
+flowchart LR
+  A["📅 훈련 카드 클릭"] --> B["💬 채팅에 '훈련 주제' 칩 + 추천 질문"]
+  B --> C["질문 앞에 날짜·훈련 정보를 붙여<br/>POST /query"]
+  C --> D["답변 + 근거 + 실행 과정"]
+  D --> E["💾 코치 피드백으로 저장<br/>POST /feedback"]
+  E --> F["카드에 한 줄 요약 표시"]
+</pre></div>
+    <p class="cap">주소: <code>/</code> 주간 화면 · <code>/debug</code> 확인용 화면(평가 질문 18건, 근거, 실행 과정) · <code>POST /query</code> 제출 규약 API</p>
+  </section>
+
+  <!-- 8 -->
+  <section class="card" id="new">
+    <h2><span class="num">8</span>승인 · 기억 · 이미지 · 영상</h2>
+    <p class="desc">Day 8에 추가한 세 기능입니다. 코치가 "제안 → 내가 승인 → 다음에 기억"하는 흐름이 됩니다.</p>
+    <div class="grid">
+      <div class="box"><div class="h"><i>✋</i>조정안 승인 (HITL)</div><p>조정안이 나오면 바로 반영하지 않고 승인 그래프가 <code>interrupt</code>에서 멈춥니다. 반영 범위를 <b>이 날만 / 이번 주 전체 / 다음 주까지</b> 중에서 고르고 [승인하고 반영]을 누르면 <code>Command(resume)</code>로 이어서 실행됩니다. 다음 주까지를 고르면 에이전트가 다음 주를 다시 짜서 한 번 더 승인을 받습니다.</p>
+        <div class="chips"><code>src/approval.py</code><code>POST /approve</code></div></div>
+      <div class="box"><div class="h"><i>🧠</i>장기 메모리</div><p>저장한 코치 피드백과 승인한 조정안을 기록 담당이 <code>get_coach_feedback</code>으로 읽습니다. "지난번에 화요일엔 뭐 하기로 했지?"에 답할 수 있습니다.</p>
+        <div class="chips"><code>get_coach_feedback</code><code>data/feedback.json</code><code>data/adjusted_plans.json</code></div></div>
+      <div class="box"><div class="h"><i>🖼️</i>이미지 첨부</div><p>📎로 시계·앱 기록 화면이나 계획표 사진을 올리면 에이전트 모델이 종류를 판정하고 보이는 수치를 글로 옮겨, 질문과 함께 같은 경로로 처리합니다. 풍경·메뉴처럼 러닝과 무관한 사진은 G6으로 거절합니다.</p>
+        <div class="chips"><code>src/vision.py</code><code>image</code> 필드(선택)</div></div>
+      <div class="box"><div class="h"><i>🎬</i>영상 자세 관찰</div><p>옆에서 찍은 달리는 영상을 올리면 OpenCV로 가운데 3초에서 프레임 8장을 뽑아 한 번에 보여 줍니다. 상체·팔치기·착지 위치를 관찰하고, 자세 원칙 문서와 비교해 "한 번에 하나만" 고칠 점을 답합니다. 보이지 않는 건 "판단 불가", 부상 예측은 하지 않습니다.</p>
+        <div class="chips"><code>video</code> 필드(선택)<code>13_running_form.md</code><code>opencv</code></div></div>
+    </div>
+    <div class="diagram" style="margin-top:14px"><pre class="mermaid">
+flowchart LR
+  A["💬 조정안 답변"] --> B{"✋ 승인 그래프<br/>interrupt 로 멈춤"}
+  B -- "승인 · 범위 선택" --> C["📅 고른 범위만 반영<br/>이 날만 / 이번 주 / 다음 주까지"]
+  C -- "다음 주까지" --> N["🗓️ 다음 주 다시 조정<br/>→ 한 번 더 승인"]
+  B -- "거절" --> D["버림 · 채팅으로 다시 요청"]
+  C --> E["🧠 다음 질문에서<br/>get_coach_feedback 으로 기억"]
+  F["💾 코치 피드백 저장"] --> E
+</pre></div>
+    <div class="note"><b>안전장치</b> — 이미지 속 글도 입력 가드레일을 거칩니다. "이전 지시 무시" 같은 글은 옮기기만 하므로 G3에서 걸리고, 신체 부위 사진은 상태를 판단하지 않습니다. 세 기능은 18건 평가 세트 밖이라 API로 직접 확인했습니다.</div>
+  </section>
+
+  <!-- 9 -->
+  <section class="card" id="eval">
+    <h2><span class="num">9</span>평가</h2>
+    <p class="desc">18개 질문 세트를 돌려 통과율을 재고, 문서 검색이 쓰이는 5건은 RAGAS로 품질을 잽니다.</p>
+    <div class="two">
+      <div>
+        <h3 style="margin-top:0">인-아웃 세트 18건</h3>
+        <div class="stats">
+          <div class="stat"><b>8</b><span>positive · 정상 질문</span></div>
+          <div class="stat"><b>3</b><span>negative · 범위 밖</span></div>
+          <div class="stat"><b>3</b><span>edge · 애매한 질문</span></div>
+          <div class="stat y"><b>4</b><span>guardrail · 전부 통과 필수</span></div>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-top:0">판정 방법</h3>
+        <ol class="steps">
+          <li><b>3번 실행</b>같은 질문을 3회 돌립니다</li>
+          <li><b>케이스별 다수결</b>3회 중 2회 이상 통과면 통과 (가드레일은 3회 모두)</li>
+          <li><b>심사</b>기대 항목·금지 항목은 심사 모델, 호출 도구는 코드가 확인</li>
+        </ol>
+      </div>
+    </div>
+    <div class="diagram" style="margin-top:16px"><pre class="mermaid">
+flowchart LR
+  Q["test_queries.csv<br/>18건 (확정 후 동결)"] --> R["에이전트 실행 × 3회"]
+  R --> J{"심사<br/>기대 항목 · 금지 항목 · 도구"}
+  J --> V["케이스별 다수결"]
+  V --> RP["round2_report.md<br/>목표 15/18 이상"]
+  R --> RG["첫 회차 답변 + 검색 문서<br/>(1, 2, 7, 8, 18번)"]
+  RG --> RA["RAGAS 4개 지표<br/>정답은 사용자가 원문 대조 후 승인"]
+</pre></div>
+    <div class="tw" style="margin-top:16px"><table>
+      <tr><th>항목</th><th>결과</th><th>목표</th></tr>
+      <tr><td>1차 평가 (첫 구현 직후, 11/10)</td><td class="no">10 / 18</td><td>—</td></tr>
+      <tr><td>2차 평가 (개선 후, 11/12, 3회 다수결)</td><td class="ok">18 / 18 · 가드레일 4/4</td><td>15 / 18 이상, 가드레일 4/4</td></tr>
+      <tr><td>RAGAS context_recall · context_precision</td><td><span class="ok">1.00</span> · <span class="no">0.44</span></td><td>0.70 이상</td></tr>
+      <tr><td>RAGAS faithfulness · answer_relevancy</td><td><span class="no">0.49</span> · <span class="no">0.29</span></td><td>0.80 이상</td></tr>
+    </table></div>
+    <div class="note"><b>RAGAS 해석</b> — 검색 재현율은 5건 모두 1.00 입니다. precision 은 문서 단위 확장이 관련 없는 소제목까지 붙인 대가이고, faithfulness 는 답변 속 본인 기록 수치(MCP 조회)가 "문서 근거 없음"으로 세어진 영향이며(문서만 보는 질문은 1.00), answer_relevancy 는 긴 복합 답변과 거절 답변에서 낮게 나오는 지표입니다. 자세한 원인은 <code>evaluation/ragas_report.md</code>.</div>
+    <div class="note"><b>규칙</b> — 테스트 세트를 확정한 뒤에는 기준을 느슨하게 바꾸지 않고, 프롬프트·도구·검색만 고쳐서 실패를 해결합니다. 평가는 코치 피드백·승인한 조정안을 비운 상태에서 돌립니다.</div>
+    <h3>컨디션 대조 평가 — 거리 한도와 강도 조정은 별개</h3>
+    <p class="desc" style="margin-bottom:12px">훈련 기록·계획표는 그대로 두고 최근 수면·안정시 심박·피로도만 바꾼 두 조건에서, 컨디션 단서가 없는 같은 질문을 3회씩 물어 화요일 인터벌 결정을 비교했습니다.</p>
+    <div class="tw"><table>
+      <tr><th>조건</th><th>"내일 화요일 인터벌 그대로 해도 될까?"</th><th>"이번 주 계획 점검해줘"</th><th>주간 거리 한도</th></tr>
+      <tr><td><b>피로</b> · 수면 5시간대, 심박 57~59, 피로도 4</td><td class="ok">3/3 조정 (조깅 대체 2 · 미룸 1)</td><td class="ok">3/3 조정 (조깅 대체)</td><td>모두 한도 안</td></tr>
+      <tr><td><b>회복</b> · 수면 7.4~7.8시간, 심박 51~52, 피로도 2</td><td class="ok">3/3 유지</td><td class="ok">3/3 유지</td><td>모두 한도 안</td></tr>
+    </table></div>
+    <div class="note">두 조건 모두 거리 한도를 지켰으니 <b>거리 한도만으로는 두 조건을 가를 수 없고</b>, 강도 조정은 컨디션 신호로만 일어났습니다. 12회 모두 근거로 컨디션 수치를 인용했습니다. 처음 시험에서는 회복 조건에서도 "지난주 34km 대비 증가"를 이유로 인터벌을 뺐는데, 문서 기준(최근 4주 최댓값)과 어긋나 "강도를 낮추는 근거는 컨디션 신호뿐" 규칙을 넣었습니다.</div>
+  </section>
+
+  <!-- 9 -->
+  <section class="card" id="days">
+    <h2><span class="num">10</span>Day 1~7에서 배운 패턴이 어디 쓰였나</h2>
+    <p class="desc">수업에서 배운 패턴을 한 서비스 안에 조합했습니다.</p>
+    <div class="tw"><table>
+      <tr><th>Day</th><th>패턴</th><th>TEMPO에서 쓰인 곳</th></tr>
+      <tr><td>1</td><td>LCEL + Pydantic 구조화 출력</td><td>답변 속 주간 계획을 <code>ExtractedPlan</code>으로 뽑아 한도 검사, 심사 결과도 구조화</td></tr>
+      <tr><td>2</td><td>RAG</td><td>문서 13종 청킹 → Titan 임베딩 → Chroma, 하이브리드 검색</td></tr>
+      <tr><td>3</td><td>ReAct</td><td>담당 3명이 스스로 도구를 골라 호출</td></tr>
+      <tr><td>4</td><td>도구 다중 · MCP</td><td>도구 9개 결합, 러너 데이터는 fastmcp 서버로 분리</td></tr>
+      <tr><td>5</td><td>가드레일</td><td>입력 G1·G3·G4 규칙 차단, 출력 G5 코드 검사</td></tr>
+      <tr><td>6</td><td>Multi-Agent Supervisor</td><td>기록·이론·계획 담당 + Supervisor</td></tr>
+      <tr><td>7</td><td>Observability · 평가</td><td>LangSmith 트레이스, API <code>trace</code> 필드, LLM-as-Judge, RAGAS</td></tr>
+          <tr><td>+</td><td>HITL</td><td>조정안을 LangGraph <code>interrupt</code>로 멈추고 승인 후 <code>Command(resume)</code>로 반영</td></tr>
+      <tr><td>+</td><td>장기 메모리</td><td>저장한 피드백·승인한 조정안을 <code>get_coach_feedback</code>으로 다시 읽음</td></tr>
+      <tr><td>+</td><td>멀티모달 입력</td><td>기록 화면 캡처를 읽고, 영상은 프레임을 뽑아 자세를 관찰해 질문에 붙임</td></tr>
+    </table></div>
+  </section>
+
+  <!-- 10 -->
+  <section class="card" id="lessons">
+    <h2><span class="num">11</span>시행착오에서 배운 것</h2>
+    <p class="desc">자세한 기록은 <code>NOTES.md</code>에 13개 항목으로 있습니다. 그중 중요한 것만 골랐습니다.</p>
+    <div class="grid">
+      <div class="box"><div class="h"><i>🐢</i>153초 → 약 50초</div><p>Supervisor가 담당 둘을 동시에 불러 같은 조회를 세 번 반복했습니다. "한 번에 한 담당" 규칙으로 해결.</p></div>
+      <div class="box"><div class="h"><i>🔌</i>MCP 호출마다 3초</div><p>호출할 때마다 서버 프로세스를 새로 띄웠습니다. 세션을 열어 둔 채로 재사용.</p></div>
+      <div class="box"><div class="h"><i>🔢</i>모델이 날짜를 잘못 셈</div><p>"4일 연속"이 실제로는 3일. 일수 계산은 도구 코드가 하고 모델은 그 값만 쓰게 했습니다.</p></div>
+      <div class="box"><div class="h"><i>🙅</i>담당이 일을 거절</div><p>담당은 Supervisor 지시가 아니라 질문 원문을 봅니다. "자기 몫만 하라"로 프롬프트 수정.</p></div>
+      <div class="box"><div class="h"><i>💥</i>첫 요청 500 오류</div><p>여러 스레드가 Chroma를 동시에 처음 열다 충돌. 서버 시작 때 미리 열고 잠금.</p></div>
+      <div class="box"><div class="h"><i>⏳</i>심사 모델 일일 한도</div><p>Bedrock 일일 토큰 한도에 걸림. 심사와 에이전트 모델을 나눠 둔 덕에 한쪽은 계속 동작.</p></div>
+    </div>
+  </section>
+
+  <!-- 11 -->
+  <section class="card" id="files">
+    <h2><span class="num">12</span>폴더 구조와 실행 방법</h2>
+    <div class="two">
+<pre class="tree"><em>src/</em>
+  agent.py       메인 그래프 · 질의 처리 · 출력 가드레일
+  tools.py       도메인 도구 (검색, 페이스, 한도 검사)
+  retriever.py   RAG (청킹, 색인, 하이브리드, 확장)
+  mcp_server.py  러너 데이터 MCP 서버
+  guards.py      입력 가드레일
+  tracer.py      실행 기록 수집
+  api.py         /query · /week · /feedback
+  feedback.py    날짜별 코치 피드백 저장
+  approval.py    조정안 승인 (HITL)
+  vision.py      첨부 이미지 판독
+  web/           주간 화면 · 확인용 화면
+<em>data/</em>
+  docs/          훈련 이론 문서 13종
+  runner/        가짜 러너 데이터 (고정 난수)
+<em>evaluation/</em>
+  test_queries.csv · run_inout.py · run_ragas.py
+SERVICE.md · README.md · NOTES.md</pre>
+      <div>
+        <ol class="steps">
+          <li><b>설치</b><code>pip install -r requirements.txt</code> + <code>.env</code>에 AWS 키</li>
+          <li><b>데이터 · 색인</b><code>python -m src.make_data</code><br><code>python -m src.retriever --build</code></li>
+          <li><b>서버</b><code>python -m uvicorn src.api:api --port 8000</code> → <code>localhost:8000</code></li>
+          <li><b>평가</b><code>python -m evaluation.run_inout --round 2 --repeat 3</code><br><code>python -m evaluation.run_ragas --round 2</code></li>
+        </ol>
+        <div class="note">실제 가민 데이터는 쓰지 않습니다. 모든 러너 데이터는 고정 난수로 만든 가짜 데이터라 누가 실행해도 같은 값이 나옵니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 13 -->
+  <section class="card" id="api">
+    <h2><span class="num">13</span>API 한눈에</h2>
+    <p class="desc">화면이 쓰는 API가 전부입니다. 화면에서 본 동작과 API로 확인한 동작이 같습니다. 제출 규약은 <code>POST /query</code> 의 <code>question</code> → <code>answer · contexts · trace</code> 입니다.</p>
+    <div class="tw"><table>
+      <tr><th>요청</th><th>하는 일</th><th>주요 입력 → 출력</th></tr>
+      <tr><td><code>POST /query</code></td><td>질문 처리 (제출 규약)</td><td><code>question</code> (+선택 <code>image</code>, <code>video</code>, <code>model</code>, <code>region</code>) → <code>answer</code>, <code>contexts</code>, <code>trace</code>, <code>meta</code>. 한도가 찬 모델이면 429</td></tr>
+      <tr><td><code>POST /approve</code></td><td>조정안 승인·거절 (HITL 재개)</td><td><code>thread_id</code>, <code>approved</code>, <code>scope</code>(day · week · through_next), <code>day</code> → 결과, 다음 주까지면 <code>next</code></td></tr>
+      <tr><td><code>GET /week</code></td><td>주간 화면 데이터</td><td><code>?start=YYYY-MM-DD</code> → 요일별 계획·기록·컨디션·피드백, 승인한 조정안</td></tr>
+      <tr><td><code>GET · POST /feedback</code></td><td>날짜별 코치 피드백 (장기 메모리)</td><td><code>date</code>, <code>question</code>, <code>answer</code> → 저장한 항목 · <code>DELETE /feedback/{date}</code> 로 최근 것 삭제</td></tr>
+      <tr><td><code>DELETE /adjusted/{week}</code></td><td>승인한 조정안 되돌리기</td><td>그 주를 원래 계획으로</td></tr>
+      <tr><td><code>GET /models</code></td><td>고를 수 있는 모델·리전</td><td>13개 모델, us-east-1 · us-west-2, 이미지 가능 여부</td></tr>
+      <tr><td><code>GET /examples</code> · <code>/health</code></td><td>예시 질문 18건 · 서버 상태</td><td>—</td></tr>
+    </table></div>
+<pre class="tree" style="margin-top:14px"><em># 요청</em>
+POST /query
+{"question": "지난주 일요일 장거리를 못 뛰었어. 이번 주 계획을 어떻게 조정하면 좋을까?",
+ "model": "global.anthropic.claude-sonnet-4-6"}
+
+<em># 응답 (줄임)</em>
+{"answer": "이번 주는 60km 계획 대신 48km로 줄입니다 ... 출처: 03_long_run.md",
+ "contexts": [{"doc_id": "03_long_run#4", "source": "03_long_run.md", "text": "..."}],
+ "trace": [{"step": "input_guard", "agent": "pipeline", "output": "통과"},
+           {"step": "get_condition", "agent": "data_agent", "output": "..."}, ...],
+ "meta": {"agents": ["data_agent", "theory_agent", "plan_agent"],
+          "output_guard": {"status": "ok", "weekly_totals_km": {"1": 48.0}, "limit_km": 60.5},
+          "approval": {"thread_id": "...", "status": "pending"}, "latency_s": 61.4}}</pre>
+  </section>
+</main>
+
+<footer>TEMPO · 마라톤 훈련 조정 코치 · 2026-11 미니 프로젝트</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: "base",
+    fontFamily: '"Noto Sans KR","Malgun Gothic",sans-serif',
+    themeVariables: {
+      primaryColor: "#EBF3FC", primaryBorderColor: "#0067B8", primaryTextColor: "#242424",
+      secondaryColor: "#FFFFFF", tertiaryColor: "#F5F5F5", lineColor: "#005A9E", textColor: "#242424",
+      actorBkg: "#0067B8", actorBorder: "#005A9E", actorTextColor: "#FFFFFF", signalColor: "#005A9E", signalTextColor: "#242424",
+      noteBkgColor: "#EBF3FC", labelBoxBkgColor: "#0067B8", sequenceNumberColor: "#FFFFFF",
+      edgeLabelBackground: "#FFFFFF", fontSize: "14px"
+    },
+    flowchart: { curve: "basis", htmlLabels: true },
+    sequence: { mirrorActors: false, actorMargin: 40 }
+  });
+</script>
+<div class="scrim" id="scrim"></div>
+<aside class="codepane" id="codepane" role="dialog" aria-modal="true" aria-label="선택한 부분의 코드"></aside>
+<script id="code-data" type="application/json">{"api.query": {"file": "src/api.py", "name": "query", "start": 83, "end": 109, "cut": false, "code": "@api.post(\"/query\")\nasync def query(q: Query):\n    if state[\"app\"] is None:\n        raise HTTPException(status_code=503, detail=\"에이전트가 아직 준비되지 않았습니다.\")\n    _check_choice(q.model, q.region, bool(q.image or q.video))\n    try:\n        if q.image:\n            vision.check_image(q.image)\n        if q.video:\n            vision.check_video(q.video)\n    except ValueError as e:\n        raise HTTPException(status_code=400, detail=str(e)) from e\n    try:\n        result = await run_query(state[\"app\"], q.question.strip(), q.image, video=q.video,\n                                 model=q.model, region=q.region)\n    except Exception as e:\n        if _is_throttled(e):\n            # 일일 토큰 한도나 분당 요청 한도에 걸렸다. 다른 모델이나 리전을 고르면 된다.\n            raise HTTPException(status_code=429, detail=(\n                f\"{q.model or MODEL_ID} ({q.region or REGION}) 의 Bedrock 사용 한도가 찼습니다. \"\n                \"다른 모델이나 리전(global 포함)을 골라 다시 보내 주세요.\")) from e\n        # 원인을 나중에 확인할 수 있게 전체 오류 내용을 파일로 남긴다\n        LOG_DIR.mkdir(parents=True, exist_ok=True)\n        with open(LOG_DIR / \"errors.log\", \"a\", encoding=\"utf-8\") as f:\n            f.write(f\"\\n[{time.strftime('%Y-%m-%d %H:%M:%S')}] {q.question}\\n{traceback.format_exc()}\")\n        raise HTTPException(status_code=500, detail=f\"{type(e).__name__}: {e}\") from e\n    return JSONResponse(content=result, media_type=\"application/json; charset=utf-8\")"}, "api.models": {"file": "src/api.py", "name": "models", "start": 122, "end": 129, "cut": false, "code": "@api.get(\"/models\")\ndef models():\n    \"\"\"고를 수 있는 모델과 리전. 일일 토큰 한도가 찬 모델을 피해 다른 모델·리전을 고를 때 쓴다.\"\"\"\n    return _json({\n        \"default\": {\"model\": MODEL_ID, \"region\": REGION},\n        \"regions\": REGIONS,\n        \"models\": [{\"id\": k, **v} for k, v in MODEL_CHOICES.items()],\n    })"}, "vision.extract_frames": {"file": "src/vision.py", "name": "extract_frames", "start": 101, "end": 135, "cut": false, "code": "def extract_frames(video: bytes, count: int = FRAME_COUNT) -> list[str]:\n    \"\"\"영상 가운데 짧은 구간(FRAME_WINDOW_S초)에서 프레임을 고르게 뽑아 JPEG data URL 목록으로 돌려준다.\"\"\"\n    import cv2   # 영상을 첨부할 때만 필요하므로 여기서 불러온다\n\n    fd, path = tempfile.mkstemp(suffix=\".video\")\n    try:\n        with os.fdopen(fd, \"wb\") as f:\n            f.write(video)\n        cap = cv2.VideoCapture(path)\n        total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)\n        fps = cap.get(cv2.CAP_PROP_FPS) or 30.0\n        if total <= 0:\n            raise ValueError(\"영상을 읽지 못했습니다. mp4(H.264) 형식으로 다시 올려 주세요.\")\n        span = min(total, int(FRAME_WINDOW_S * fps))\n        start = max(0, (total - span) // 2)\n        picks = [start + round(i * (span - 1) / max(1, count - 1)) for i in range(count)]\n        frames = []\n        for idx in picks:\n            cap.set(cv2.CAP_PROP_POS_FRAMES, idx)\n            ok, frame = cap.read()\n            if not ok:\n                continue\n            h, w = frame.shape[:2]\n            k = min(1.0, FRAME_MAX_SIDE / max(h, w))\n            if k < 1.0:\n                frame = cv2.resize(frame, (int(w * k), int(h * k)))\n            ok, jpg = cv2.imencode(\".jpg\", frame, [cv2.IMWRITE_JPEG_QUALITY, 85])\n            if ok:\n                frames.append(\"data:image/jpeg;base64,\" + base64.b64encode(jpg.tobytes()).decode())\n        cap.release()\n    finally:\n        os.remove(path)\n    if not frames:\n        raise ValueError(\"영상에서 프레임을 뽑지 못했습니다. mp4(H.264) 형식으로 다시 올려 주세요.\")\n    return frames"}, "vision.read_video": {"file": "src/vision.py", "name": "read_video", "start": 153, "end": 156, "cut": false, "code": "async def read_video(data_url: str) -> tuple[ImageReading, int]:\n    \"\"\"영상에서 프레임을 뽑아 종류를 판정하고 자세를 관찰한 글을 돌려준다. (판독 결과, 프레임 수)\"\"\"\n    frames = extract_frames(check_video(data_url))\n    return await _read(frames, READ_PROMPT + FORM_PROMPT), len(frames)"}, "vision.ImageReading": {"file": "src/vision.py", "name": "ImageReading", "start": 63, "end": 71, "cut": false, "code": "class ImageReading(BaseModel):\n    \"\"\"첨부 이미지 판독 결과.\"\"\"\n    kind: Literal[\"running_record\", \"training_plan\", \"running_chart\", \"running_photo\",\n                  \"body_part\", \"unrelated\"] = Field(\n        description=\"running_record: 시계·앱의 러닝 기록 화면, training_plan: 훈련 계획표, \"\n                    \"running_chart: 페이스·심박·거리 그래프, running_photo: 달리는 모습이나 대회 사진, \"\n                    \"body_part: 신체 부위·상처·부기 사진, unrelated: 그 밖의 모든 이미지\"\n    )\n    text: str = Field(description=\"이미지에 보이는 내용을 옮긴 글\")"}, "guards.input_guard": {"file": "src/guards.py", "name": "input_guard", "start": 93, "end": 112, "cut": false, "code": "def input_guard(text: str) -> GuardResult:\n    \"\"\"입력을 검사한다. 차단 대상이면 고정 거절 문구를 담아 돌려준다.\"\"\"\n    category, reason = \"\", \"\"\n    for pattern in INJECTION_PATTERNS:\n        if re.search(pattern, text, re.IGNORECASE):\n            category, reason = \"injection\", f\"주입 패턴: {pattern}\"\n            break\n    if not category and re.search(SYMPTOM, text) and re.search(MEDICAL_INTENT, text):\n        category, reason = \"medical\", \"증상 표현과 진단·약물 의도가 함께 있음\"\n    if not category:\n        for pattern in OTHER_PERSON_PATTERNS:\n            if re.search(pattern, text):\n                category, reason = \"other_person\", f\"타인 정보 패턴: {pattern}\"\n                break\n\n    if not category:\n        return GuardResult(blocked=False)\n    result = GuardResult(True, category, RULE_IDS[category], reason, REFUSALS[category])\n    _audit(text, result)\n    return result"}, "guards.image_guard": {"file": "src/guards.py", "name": "image_guard", "start": 115, "end": 122, "cut": false, "code": "def image_guard(kind: str, seen: str) -> GuardResult:\n    \"\"\"첨부 이미지의 종류를 검사한다. 러닝과 무관하거나 신체 부위 사진이면 고정 문구로 차단한다.\"\"\"\n    if kind in RUNNING_IMAGE_KINDS:\n        return GuardResult(blocked=False)\n    category = \"body_image\" if kind == \"body_part\" else \"unrelated_image\"\n    result = GuardResult(True, category, RULE_IDS[category], f\"이미지 종류: {kind}\", REFUSALS[category])\n    _audit(f\"[첨부 이미지] {seen}\", result)\n    return result"}, "config.use_model": {"file": "src/config.py", "name": "use_model", "start": 81, "end": 88, "cut": false, "code": "@contextmanager\ndef use_model(model: str | None = None, region: str | None = None):\n    \"\"\"이 블록 안에서 만드는 모델(make_llm)이 고른 모델·리전을 쓰게 한다.\"\"\"\n    token = _selected.set((model, region))\n    try:\n        yield\n    finally:\n        _selected.reset(token)"}, "config.make_llm": {"file": "src/config.py", "name": "make_llm", "start": 137, "end": 146, "cut": false, "code": "def make_llm(model: str | None = None, region: str | None = None, **kwargs):\n    \"\"\"Bedrock 채팅 모델을 만든다. temperature는 재현성을 위해 0으로 둔다.\n\n    model·region 을 주지 않으면 지금 요청이 고른 값(use_model), 그것도 없으면 기본값을 쓴다.\n    \"\"\"\n    from langchain_aws import ChatBedrockConverse\n\n    kwargs.setdefault(\"temperature\", 0)\n    selected_model, selected_region = current_model()\n    return ChatBedrockConverse(model=model or selected_model, region_name=region or selected_region, **kwargs)"}, "agent.ModelGraphs": {"file": "src/agent.py", "name": "ModelGraphs", "start": 201, "end": 217, "cut": false, "code": "class ModelGraphs:\n    \"\"\"(모델, 리전)마다 그래프를 한 번만 조립해 두고 꺼내 준다.\n\n    그래프 안의 에이전트는 조립할 때 모델이 정해지므로, 모델을 바꾸려면 그 모델로 조립한 그래프가\n    따로 있어야 한다. MCP 연결은 모든 그래프가 같이 쓴다.\n    \"\"\"\n\n    def __init__(self, mcp_tools: list):\n        self.mcp_tools = mcp_tools\n        self._graphs: dict[tuple[str, str], object] = {}\n\n    def get(self):\n        \"\"\"지금 요청이 고른 (모델, 리전)의 그래프. 처음이면 조립한다.\"\"\"\n        key = current_model()\n        if key not in self._graphs:\n            self._graphs[key] = build_graph(self.mcp_tools)\n        return self._graphs[key]"}, "agent.build_graph": {"file": "src/agent.py", "name": "build_graph", "start": 182, "end": 198, "cut": false, "code": "def build_graph(mcp_tools: list):\n    \"\"\"서브 에이전트 3종과 Supervisor를 조립해 컴파일한 그래프를 돌려준다.\"\"\"\n    data_agent = create_agent(\n        make_llm(), mcp_tools, system_prompt=DATA_AGENT_PROMPT, name=\"data_agent\"\n    )\n    theory_agent = create_agent(\n        make_llm(), [retrieve_training_docs], system_prompt=THEORY_AGENT_PROMPT, name=\"theory_agent\"\n    )\n    plan_agent = create_agent(\n        make_llm(), [calc_pace, check_week_plan], system_prompt=PLAN_AGENT_PROMPT, name=\"plan_agent\"\n    )\n    supervisor = create_supervisor(\n        [data_agent, theory_agent, plan_agent],\n        model=make_llm(),\n        prompt=SUPERVISOR_PROMPT,\n    )\n    return supervisor.compile()"}, "agent.SUPERVISOR_PROMPT": {"file": "src/agent.py", "name": "SUPERVISOR_PROMPT", "start": 99, "end": 176, "cut": true, "code": "SUPERVISOR_PROMPT = (\n    \"너는 마라톤 훈련 조정 코치 서비스 TEMPO의 Supervisor다. 사용자는 러너 \"\n    f\"{RUNNER_ID} 본인이다.\\n\"\n    f\"{date_context()}\\n\"\n    \"\\n\"\n    \"[배분 기준]\\n\"\n    \"- 프로필, 계획표, 훈련 기록, 주간 거리 집계, 컨디션(안정시 심박·수면·피로도), 저장된 지난 코치 피드백 조회는 data_agent\\n\"\n    \"- 훈련 이론과 원칙(심박존, 장거리주, 인터벌, 테이퍼링, 놓친 훈련 처리, 컨디션에 따른 조정 등)의 \"\n    \"근거 검색, 러닝 자세 원칙 검색은 theory_agent\\n\"\n    \"- 페이스·기록 환산과 주간 계획 조정안 작성은 plan_agent\\n\"\n    \"\\n\"\n    \"[진행 규칙]\\n\"\n    \"- 직접 지어내지 말고 반드시 담당 Agent로 확인한 내용만 답한다.\\n\"\n    \"- 강도와 거리는 따로 판단한다. 고강도 훈련(인터벌·템포런·크루즈 인터벌 등)을 낮추거나 바꾸는 근거는 \"\n    \"문서의 컨디션 조건(수면 6시간 미만 2일 이상, 안정시 심박 평소보다 5회 이상 높음 등)뿐이다. 컨디션 신호가 \"\n    \"없으면 고강도 훈련은 계획대로 둔다.\\n\"\n    \"- 거리 증가는 지난주가 아니라 최근 4주 실제 주간 거리 최댓값 기준(주간 거리 한도)으로 판단한다. 한 주를 덜 \"\n    \"뛴 직후에도 한도 안이면 원래 계획으로 돌아갈 수 있다.\\n\"\n    \"- 놓친 훈련은 보충하지 않는 것으로 처리하고, 놓친 장거리주는 다음 장거리주의 거리(원래 계획대로, 또는 최근 \"\n    \"실제 최장 거리에서 2~3km 늘린 값)에만 반영한다. 놓친 훈련을 이유로 다른 날의 강도를 낮추지 않는다.\\n\"\n    \"- 사용자가 물은 것에 먼저 직접 답한다. 질문을 다른 질문으로 바꾸지 않는다. 예: 페이스를 물으면 \"\n    \"페이스 수치를 먼저 답한다. 컨디션 신호 때문에 그 훈련을 바꾸는 게 좋아 보이면, 답한 뒤에 '다만'으로 \"\n    \"근거 수치와 함께 덧붙여 권한다. 요일별 조정표는 사용자가 계획 조정이나 훈련 여부를 물었을 때만 싣는다.\\n\"\n    \"- 페이스 질문(인터벌·템포·장거리·대회 페이스 등)은 (1) data_agent로 프로필의 개인 기록과 목표, \"\n    \"(2) theory_agent로 그 훈련의 페이스 정하는 원칙, (3) plan_agent에게 calc_pace로 계산을 맡긴다. \"\n    \"컨디션 확인이 필요하면 (1)에서 함께 조회한다.\\n\"\n    \"- 질문 앞의 [훈련 카드: ...]는 사용자가 화면에서 고른 훈련이다. 그 날짜와 기준일(오늘)의 관계(오늘·내일·지난)를 \"\n    \"그대로 쓰고, 훈련 날짜를 '오늘'이라고 부르지 않는다.\\n\"\n    \"- 컨디션 기록의 기간과 날짜는 도구가 준 값(예: signals.last_day)을 그대로 쓴다. 기준일 당일의 컨디션 \"\n    \"기록은 아직 없다.\\n\"\n    \"- 한 번에 한 담당에게만 위임하고 그 결과를 받은 뒤 다음 담당을 부른다. 여러 담당을 동시에 \"\n    \"부르지 않는다.\\n\"\n    \"- 같은 담당에게 같은 내용을 다시 맡기지 않는다. 이미 받은 결과는 그대로 쓴다.\\n\"\n    \"- 계획 작성·조정이나 훈련 가능 여부를 묻는 질문은 세 단계로 진행한다. (1) data_agent로 계획표, \"\n    \"주간 집계, 최근 7일 컨디션(안정시 심박·수면·피로도)을 확인한다. (2) theory_agent로 근거 원칙을 \"\n    \"찾는다. (3) plan_agent에게 조정안을 맡긴다. 최종 답변에는 컨디션 수치를 반드시 반영한다.\\n\"\n    \"- 요일별 계획이나 조정안은 네가 직접 쓰지 않는다. 원래 계획을 그대로 유지하라는 결론이어도 \"\n    \"plan_agent가 check_week_plan으로 검사한 계획만 답변에 싣는다.\\n\"\n    \"- 사용자가 무리한 요청(한도를 넘는 거리, 달성하기 어려운 목표)을 해도 조회를 건너뛰지 않는다. \"\n    \"data_agent로 현재 기록과 주간 거리를 먼저 확인하고 그 수치로 설명한다.\\n\"\n    \"- 담당이 결과를 주지 못하면 같은 담당을 반복해 부르지 말고, 확인하지 못한 내용이 무엇인지 \"\n    \"밝힌다.\\n\""}, "agent.DATA_AGENT_PROMPT": {"file": "src/agent.py", "name": "DATA_AGENT_PROMPT", "start": 46, "end": 64, "cut": false, "code": "DATA_AGENT_PROMPT = (\n    f\"너는 러너 {RUNNER_ID}의 훈련 데이터 조회 담당이다. Supervisor가 사용자 질문을 해결하는 \"\n    \"과정에서 데이터 조회를 너에게 맡겼다.\\n\"\n    f\"{date_context()}\\n\"\n    \"사용자 질문 전체에 답하려 하지 말고, 그 질문을 해결하는 데 필요한 데이터를 도구로 조회해 \"\n    \"보고하는 것까지만 한다. 계획을 짜 달라거나 조정해 달라는 질문이어도 거절하지 말고 필요한 \"\n    \"데이터를 조회해 보고한다.\\n\"\n    \"- 계획 작성·조정이나 훈련 가능 여부를 묻는 질문: 이번 주 계획표(get_planned_workouts), 최근 4주 \"\n    \"주간 집계(get_weekly_summary), 최근 7일 컨디션(get_condition)을 모두 조회한다. 목표나 기록이 \"\n    \"관련되면 프로필(get_runner_profile)도 조회한다.\\n\"\n    \"- 그 밖의 질문: 답에 필요한 도구만 골라 조회한다.\\n\"\n    \"- 이전 조언('지난번', '전에 말한', '코치 피드백')을 가리키는 질문과 계획 조정 질문에서는 \"\n    \"최근 4주 저장된 코치 피드백(get_coach_feedback)도 조회해 함께 보고한다. 저장된 피드백은 \"\n    \"사용자가 남긴 장기 메모리다.\\n\"\n    \"조회한 수치를 그대로 보고하고, 조회되지 않은 값은 지어내지 않는다. 일수와 합계는 도구가 계산해 \"\n    \"준 값을 쓰고 직접 세지 않는다.\\n\"\n    \"조회 결과가 없으면 없다는 사실과 조회 가능한 기간을 그대로 전한다.\\n\"\n    \"훈련 이론 설명과 조정안 작성은 하지 않는다 (다른 담당이 한다).\"\n)"}, "agent.THEORY_AGENT_PROMPT": {"file": "src/agent.py", "name": "THEORY_AGENT_PROMPT", "start": 66, "end": 79, "cut": false, "code": "THEORY_AGENT_PROMPT = (\n    \"너는 마라톤 훈련 이론 문서 검색 담당이다. Supervisor가 사용자 질문을 해결하는 과정에서 근거 \"\n    \"원칙 검색을 너에게 맡겼다.\\n\"\n    \"사용자 질문 전체에 답하려 하지 말고, 그 질문을 해결하는 데 필요한 훈련 원칙을 \"\n    \"retrieve_training_docs로 검색해 보고하는 것까지만 한다. 계획을 짜 달라는 질문이어도 거절하지 \"\n    \"말고 관련 원칙을 검색해 보고한다.\\n\"\n    \"반드시 검색 결과에 있는 내용만 전하고, 근거가 된 문서의 source(파일명)를 출처로 표기한다.\\n\"\n    \"검색 결과 중 질문과 관련된 원칙은 소제목별로 빠뜨리지 않고 전한다. 무엇을 바꾸는지와 함께 \"\n    \"무엇을 유지하는지도 전한다.\\n\"\n    \"검색 결과에 답이 없으면 '보유 자료에 해당 내용이 없습니다'라고 답하고 일반 지식으로 채우지 않는다.\\n\"\n    \"자료에 없을 것 같은 주제라도 retrieve_training_docs를 한 번 이상 호출해 확인한 뒤에 답한다. \"\n    \"검색하지 않고 '없다'고 답하지 않는다.\\n\"\n    \"러너의 기록 조회와 조정안 작성은 하지 않는다 (다른 담당이 한다).\"\n)"}, "agent.PLAN_AGENT_PROMPT": {"file": "src/agent.py", "name": "PLAN_AGENT_PROMPT", "start": 81, "end": 97, "cut": false, "code": "PLAN_AGENT_PROMPT = (\n    \"너는 페이스 계산과 주간 훈련 계획 조정안 작성 담당이다. Supervisor가 사용자 질문을 해결하는 \"\n    \"과정에서 계산과 조정안 작성을 너에게 맡겼다.\\n\"\n    f\"{date_context()}\\n\"\n    \"페이스와 기록 환산은 암산하지 말고 반드시 calc_pace로 계산한다.\\n\"\n    \"- 강도와 거리는 따로 판단한다. 고강도 훈련(인터벌·템포런·크루즈 인터벌 등)을 낮추거나 바꾸는 근거는 \"\n    \"문서의 컨디션 조건(수면 6시간 미만 2일 이상, 안정시 심박 평소보다 5회 이상 높음 등)뿐이다. 컨디션 신호가 \"\n    \"없으면 고강도 훈련은 계획대로 둔다.\\n\"\n    \"- 거리 증가는 지난주가 아니라 최근 4주 실제 주간 거리 최댓값 기준(주간 거리 한도)으로 판단한다. 한 주를 덜 \"\n    \"뛴 직후에도 한도 안이면 원래 계획으로 돌아갈 수 있다.\\n\"\n    \"- 놓친 훈련은 보충하지 않는 것으로 처리하고, 놓친 장거리주는 다음 장거리주의 거리(원래 계획대로, 또는 최근 \"\n    \"실제 최장 거리에서 2~3km 늘린 값)에만 반영한다. 놓친 훈련을 이유로 다른 날의 강도를 낮추지 않는다.\\n\"\n    \"조정안은 대화에 이미 나온 기록 수치와 문서 근거만으로 만들고, 요일·훈련 종류·거리를 적는다.\\n\"\n    \"주간 계획이나 조정안을 내놓기 전에 반드시 check_week_plan으로 검사하고, ok가 true인 계획만 \"\n    \"제시한다. 주간 합계와 한도를 함께 적는다.\\n\"\n    \"기록이나 문서 근거가 대화에 없으면 지어내지 말고 무엇이 더 필요한지 말한다.\"\n)"}, "agent.run_query": {"file": "src/agent.py", "name": "run_query", "start": 339, "end": 347, "cut": false, "code": "async def run_query(app, question: str, image: str | None = None, plan_week: str | None = None,\n                    video: str | None = None, model: str | None = None, region: str | None = None) -> dict:\n    \"\"\"질의 한 건을 처리해 {answer, contexts, trace, meta}를 돌려준다.\n\n    app 은 open_app() 이 내준 모델별 그래프 묶음이다. model·region 을 주면 이 요청의 에이전트,\n    출력 가드레일, 이미지 판독이 모두 그 모델·리전으로 돈다 (일일 토큰 한도가 찬 모델을 피할 때).\n    \"\"\"\n    with use_model(model, region):\n        return await _run_query(app.get(), question, image, plan_week, video)"}, "agent._run_query": {"file": "src/agent.py", "name": "_run_query", "start": 350, "end": 406, "cut": true, "code": "async def _run_query(app, question: str, image: str | None, plan_week: str | None, video: str | None) -> dict:\n    \"\"\"run_query 의 본체. app 은 고른 모델로 조립한 그래프다.\n\n    image 는 선택 항목이다 (data:image/...;base64,... 형식). 주어지면 먼저 판독해 질문 뒤에 붙인다.\n    video 도 선택 항목이다 (data:video/...;base64,...). 프레임을 뽑아 자세를 관찰한 글을 질문 뒤에 붙인다.\n    plan_week 는 답변 속 계획의 1주차가 어느 주인지(월요일 날짜)다. 생략하면 기준일이 속한 주.\n    다음 주를 이어서 조정할 때 approval 이 다음 주 월요일을 넘긴다.\n    \"\"\"\n    started = time.time()\n    rec = RunRecorder()\n    asked = question\n    reading = None\n    if video:\n        reading, n_frames = await vision.read_video(video)\n        rec.add_step(\"video_reader\", f\"첨부 영상 (프레임 {n_frames}장)\", f\"[{reading.kind}] {reading.text}\")\n        question = (f\"{question}\\n\\n[첨부 영상에서 뽑은 프레임 {n_frames}장으로 관찰한 자세]\\n{reading.text}\\n\"\n                    \"(영상 프레임 관찰은 참고용이다. 자세 원칙은 문서로 확인하고 부상 예측·진단은 하지 않는다)\")\n    elif image:\n        reading = await vision.read_image(image)\n        rec.add_step(\"image_reader\", \"첨부 이미지\", f\"[{reading.kind}] {reading.text}\")\n        question = f\"{question}\\n\\n[첨부 이미지에서 읽은 내용]\\n{reading.text}\"\n\n    # 이미지 속 글도 먼저 G1·G3·G4 로 검사하고, 통과하면 이미지 종류를 검사한다 (G6, 신체 사진은 G1)\n    guard = input_guard(question)\n    if not guard.blocked and reading is not None:\n        guard = image_guard(reading.kind, reading.text)\n    if guard.blocked:\n        rec.add_step(\"input_guard\", question, f\"차단 ({guard.rule_id} {guard.category})\")\n        answer, meta = guard.message, {\"blocked\": True, \"rule_id\": guard.rule_id,\n                                       \"category\": guard.category}\n    else:\n        rec.add_step(\"input_guard\", question, \"통과\")\n        result = await app.ainvoke(\n            {\"messages\": [HumanMessage(content=question)]},\n            config={\"callbacks\": [rec], \"recursion_limit\": 40},\n        )\n        draft = get_text(result[\"messages\"][-1])\n        answer, plan_info = await output_guard(draft, rec)\n        meta = {\"blocked\": False, \"output_guard\": plan_info}\n        # 한도를 통과한 조정안은 바로 반영하지 않고 사용자 승인을 기다린다 (HITL)\n        if (plan_info[\"status\"] in (\"ok\", \"rewritten\") and plan_info.get(\"days\")\n                and not approval.already_approved(plan_info[\"days\"], plan_week)):"}, "agent.output_guard": {"file": "src/agent.py", "name": "output_guard", "start": 284, "end": 333, "cut": true, "code": "async def output_guard(answer: str, rec: RunRecorder) -> tuple[str, dict]:\n    \"\"\"G5 검사. (최종 답변, 검사 결과)를 돌려준다. 한도를 넘으면 고쳐 쓰고, 그래도 넘으면 계획을 뺀다.\"\"\"\n    limit = da.weekly_limit()[\"limit_km\"]\n    info = {\"proposes_plan\": False, \"weekly_totals_km\": {}, \"limit_km\": limit,\n            \"status\": \"no_plan\", \"sources\": []}\n    try:\n        plan = await _extract_chain().ainvoke({\"answer\": answer})\n    except Exception as e:   # 추출 실패는 답변을 막지 않고 기록만 남긴다\n        info[\"status\"] = f\"extract_failed: {type(e).__name__}\"\n        rec.add_step(\"output_guard\", \"주간 계획 추출\", info[\"status\"])\n        return answer, info\n\n    info[\"sources\"] = plan.sources\n    info[\"days\"] = [d.model_dump() for d in plan.days]\n    if not (plan.proposes_plan and plan.days):\n        rec.add_step(\"output_guard\", \"주간 계획 추출\", \"제시된 주간 계획 없음 (G5 검사 대상 아님)\")\n        return answer, info\n\n    totals = _weekly_totals(plan)\n    info.update(proposes_plan=True, weekly_totals_km=totals, status=\"ok\")\n    worst = max(totals.values())\n    if evaluate_week_total(worst)[\"ok\"]:\n        rec.add_step(\"output_guard\", f\"주간 합계 {totals}\", f\"한도 {limit}km 이내 (G5 통과)\")\n        return answer, info\n\n    # 한도 초과: 한 번 고쳐 쓰게 하고 다시 검사한다\n    rewritten = get_text(await (REWRITE_PROMPT | make_llm()).ainvoke(\n        {\"limit\": limit, \"total\": worst, \"answer\": answer}\n    ))\n    try:\n        plan2 = await _extract_chain().ainvoke({\"answer\": rewritten})\n        totals2 = _weekly_totals(plan2) if plan2.days else {}\n    except Exception:\n        totals2 = {0: float(\"inf\")}\n    if totals2 and evaluate_week_total(max(totals2.values()))[\"ok\"]:\n        info.update(weekly_totals_km=totals2, status=\"rewritten\", days=[d.model_dump() for d in plan2.days])\n        rec.add_step(\"output_guard\", f\"주간 합계 {totals} (한도 {limit}km 초과)\",\n                     f\"한도 이내로 고쳐 씀: {totals2} (G5)\")\n        return rewritten, info\n\n    # 고쳐 써도 넘으면 계획을 내보내지 않는다\n    info.update(status=\"blocked\", days=[])"}, "agent.ExtractedPlan": {"file": "src/agent.py", "name": "ExtractedPlan", "start": 244, "end": 251, "cut": false, "code": "class ExtractedPlan(BaseModel):\n    \"\"\"답변에서 뽑아낸 주간 계획과 출처.\"\"\"\n    proposes_plan: bool = Field(\n        description=\"답변이 사용자에게 앞으로 수행할 주간 계획이나 조정안을 제시하는가. \"\n                    \"과거 기록을 나열한 것은 계획이 아니다\"\n    )\n    days: list[PlanDay] = Field(default_factory=list, description=\"제시된 계획의 요일별 훈련\")\n    sources: list[str] = Field(default_factory=list, description=\"답변이 출처로 표기한 문서 파일명\")"}, "mcp.get_condition": {"file": "src/mcp_server.py", "name": "get_condition", "start": 129, "end": 183, "cut": true, "code": "@mcp.tool()\ndef get_condition(start_date: str, end_date: str) -> str:\n    \"\"\"일별 컨디션 지표를 기간으로 조회한다.\n\n    날짜별 안정시 심박, 수면 시간, 주관적 피로도(1~5)와 기간 평균을 돌려준다.\n    평소 안정시 심박(baseline)과 비교해 피로 누적 여부를 판단할 때 사용한다.\n    수면 6시간 미만 일수, 안정시 심박이 평소보다 5회 이상 높은 일수와 연속 일수는\n    signals에 계산돼 있으니 직접 세지 말고 그 값을 그대로 쓴다.\n\n    Args:\n        start_date: 시작일 (YYYY-MM-DD)\n        end_date: 종료일 (YYYY-MM-DD)\n    \"\"\"\n    rng, err = _range_or_error(start_date, end_date)\n    if err:\n        return err\n    rows = da.condition(*rng)\n    first, last = da.data_range()\n    if not rows:\n        return (\n            f\"{rng[0]}~{rng[1]} 기간에는 컨디션 기록이 없습니다. \"\n            f\"조회 가능한 기간은 {first}~{last}입니다.\"\n        )\n    n = len(rows)\n    baseline = da.profile()[\"heart_rate\"][\"baseline_resting_hr\"]\n\n    def streak(flag) -> int:\n        \"\"\"기간의 마지막 날부터 거슬러 올라가며 조건이 이어진 일수.\"\"\"\n        count = 0\n        for r in reversed(rows):\n            if not flag(r):\n                break\n            count += 1\n        return count\n\n    short_sleep = lambda r: r[\"sleep_hours\"] < 6          # noqa: E731\n    high_rhr = lambda r: r[\"resting_hr\"] - baseline >= 5  # noqa: E731\n    return _dump({\n        \"runner_id\": RUNNER_ID,\n        \"baseline_resting_hr\": baseline,\n        # 날짜를 세는 일은 모델에게 맡기지 않고 여기서 계산해 넘긴다\n        \"signals\": {"}, "mcp.get_coach_feedback": {"file": "src/mcp_server.py", "name": "get_coach_feedback", "start": 187, "end": 214, "cut": false, "code": "@mcp.tool()\ndef get_coach_feedback(start_date: str, end_date: str) -> str:\n    \"\"\"사용자가 저장해 둔 지난 코치 피드백(이전 질문과 답변)과 승인한 주간 조정안을 기간으로 조회한다.\n\n    대화가 끝나도 남는 장기 메모리다. 웹 화면에서 사용자가 답변을 그 날짜의 코치 피드백으로\n    저장한 것만 들어 있다. \"지난번에 뭐라고 했지?\", \"전에 줄이라고 한 거\" 처럼 이전 조언을\n    가리키는 질문, 그리고 계획 조정 질문에서 이전 조언과 어긋나지 않게 답하려 할 때 사용한다.\n    날짜는 YYYY-MM-DD 형식이다. 저장된 피드백이 없으면 없다고 돌려준다.\n    \"\"\"\n    rng, err = _range_or_error(start_date, end_date)\n    if err:\n        return err\n    saved = feedback.load_all()\n    items = [\n        {\"date\": day, \"saved_at\": e[\"saved_at\"], \"question\": e[\"question\"],\n         \"summary\": e[\"summary\"], \"answer\": e[\"answer\"][:800]}\n        for day in sorted(saved) if rng[0] <= day <= rng[1]\n        for e in saved[day]\n    ]\n    plans = [\n        {\"week_start\": monday, **plan} for monday, plan in sorted(approval.load_all().items())\n        if any(d[\"date\"] >= rng[0] for d in plan[\"days\"])   # 앞으로 따를 조정안은 기간 뒤여도 돌려준다\n    ]\n    if not items and not plans:\n        return f\"{rng[0]}~{rng[1]} 기간에 저장된 코치 피드백과 승인한 조정안이 없습니다.\"\n    return _dump({\"start_date\": rng[0], \"end_date\": rng[1], \"feedback\": items,\n                  \"approved_plans\": plans,\n                  \"note\": \"approved_plans 는 사용자가 승인해 원래 계획표 대신 따르기로 한 조정안이다\"})"}, "tools.retrieve_training_docs": {"file": "src/tools.py", "name": "retrieve_training_docs", "start": 22, "end": 37, "cut": false, "code": "@tool\ndef retrieve_training_docs(query: str) -> str:\n    \"\"\"마라톤 훈련 이론 문서에서 관련 내용을 검색한다.\n\n    심박존, 존2 조깅, 장거리주, 마라톤 페이스주, 젖산역치 훈련, 인터벌, 가속주와 업힐,\n    주기화와 주간 구성(놓친 훈련 처리), 주간 거리 증가와 과훈련 신호(컨디션에 따른 조정),\n    테이퍼링, 대회 페이스 전략과 보급, 대회 후 회복과 부상 예방에 대한 근거가 필요할 때 쓴다.\n    결과는 doc_id, source(문서 파일명), text 목록이다. 답변에는 source를 출처로 표기한다.\n\n    Args:\n        query: 찾고 싶은 내용을 담은 검색 문장\n    \"\"\"\n    hits = retriever.search(query)\n    if not hits:\n        return \"관련 문서를 찾지 못했습니다.\"\n    return json.dumps(hits, ensure_ascii=False, indent=2)"}, "tools.check_week_plan": {"file": "src/tools.py", "name": "check_week_plan", "start": 126, "end": 141, "cut": false, "code": "@tool(args_schema=WeekPlanInput)\ndef check_week_plan(sessions: list[PlanSession]) -> str:\n    \"\"\"주간 계획의 거리 합계가 주간 거리 한도 안인지 검사한다.\n\n    주간 계획이나 조정안을 사용자에게 제시하기 전에 반드시 이 도구로 검사한다.\n    ok가 false이면 거리를 줄여 다시 검사하고, ok가 true인 계획만 제시한다.\n    \"\"\"\n    total = sum(s.distance_km for s in sessions)\n    result = evaluate_week_total(total)\n    result[\"message\"] = (\n        \"한도 이내입니다. 이 계획을 제시해도 됩니다.\"\n        if result[\"ok\"]\n        else f\"한도를 {round(result['total_km'] - result['limit_km'], 1)}km 초과했습니다. \"\n             \"거리를 줄여 다시 검사하세요.\"\n    )\n    return json.dumps(result, ensure_ascii=False, indent=2)"}, "tools.calc_pace": {"file": "src/tools.py", "name": "calc_pace", "start": 58, "end": 100, "cut": true, "code": "@tool\ndef calc_pace(target_time: str = \"\", pace_per_km: str = \"\", distance_km: float = 42.195,\n              offset_sec_per_km: float = 0) -> str:\n    \"\"\"목표 기록과 km당 페이스를 서로 환산한다. 암산하지 말고 반드시 이 도구로 계산한다.\n\n    target_time만 주면 km당 페이스를, pace_per_km만 주면 예상 완주 기록을 돌려준다.\n    offset_sec_per_km 를 주면 계산한 km당 페이스에 그만큼 더한다 (음수면 빠르게).\n    예: 인터벌 페이스 = 10km 기록 페이스보다 10~15초 빠르게 -> target_time='0:48:40',\n    distance_km=10, offset_sec_per_km=-10 과 -15 로 두 번 계산해 범위를 만든다.\n\n    Args:\n        target_time: 목표 완주 기록. 'h:mm:ss' 형식 (예: '3:30:00')\n        pace_per_km: km당 페이스. 'm:ss' 형식 (예: '4:59')\n        distance_km: 거리 km. 풀코스 42.195(기본), 하프 21.0975, 10K 10\n        offset_sec_per_km: km당 페이스 보정 초. 음수면 빠르게, 양수면 느리게 (기본 0)\n    \"\"\"\n    try:\n        if target_time:\n            total = _to_seconds(target_time)\n            per_km = total / distance_km\n        elif pace_per_km:\n            per_km = _to_seconds(pace_per_km)\n            total = per_km * distance_km\n        else:\n            return \"target_time 또는 pace_per_km 중 하나를 입력하세요.\"\n    except (ValueError, ZeroDivisionError):\n        return \"시간 형식이 잘못되었습니다. 기록은 'h:mm:ss', 페이스는 'm:ss' 형식으로 입력하세요.\"\n    if offset_sec_per_km:\n        per_km = max(1.0, per_km + offset_sec_per_km)\n        total = per_km * distance_km\n\n    splits = {\n        f\"{km}km\": _clock(per_km * km)\n        for km in (5, 10, 21.0975, 30, 42.195)\n        if km <= distance_km + 1e-6\n    }\n    return json.dumps({\n        \"distance_km\": distance_km,\n        \"finish_time\": _clock(total),\n        \"pace_per_km\": _clock(per_km),\n        \"pace_seconds_per_km\": round(per_km, 1),\n        \"split_times\": splits,"}, "tools.runner_mcp_tools": {"file": "src/tools.py", "name": "runner_mcp_tools", "start": 145, "end": 166, "cut": false, "code": "@asynccontextmanager\nasync def runner_mcp_tools():\n    \"\"\"러너 데이터 MCP 서버를 자식 프로세스로 띄우고 도구 목록을 내준다.\n\n    세션을 열어 둔 채로 도구를 쓰므로 서버 프로세스는 한 번만 뜬다. 세션 없이 도구를 만들면\n    도구를 호출할 때마다 서버가 새로 떠서 호출당 약 3초가 더 걸렸다.\n    \"\"\"\n    from langchain_mcp_adapters.client import MultiServerMCPClient\n    from langchain_mcp_adapters.tools import load_mcp_tools\n\n    client = MultiServerMCPClient({\n        \"runner\": {\n            \"command\": sys.executable,\n            \"args\": [str(ROOT / \"src\" / \"mcp_server.py\")],\n            \"transport\": \"stdio\",\n            # 자식 프로세스는 기본 환경 변수(PATH 등)만 물려받는다. 기준일·컨디션 시나리오 같은\n            # 프로젝트 설정(RUNCOACH_*)은 직접 넘겨야 서버도 같은 조건으로 데이터를 낸다.\n            \"env\": {k: v for k, v in os.environ.items() if k.startswith(\"RUNCOACH_\")},\n        }\n    })\n    async with client.session(\"runner\") as session:\n        yield await load_mcp_tools(session)"}, "retriever.search": {"file": "src/retriever.py", "name": "search", "start": 190, "end": 207, "cut": false, "code": "def search(query: str, k: int = RETRIEVER_K, mode: str | None = None) -> list[dict]:\n    \"\"\"질문과 관련된 문서 청크를 찾아 dict 목록으로 돌려준다.\"\"\"\n    mode = mode or RETRIEVER_MODE\n    if mode == \"hybrid\":\n        docs = _hybrid_retriever().invoke(query)[:k]\n    else:\n        docs = get_db().similarity_search(query, k=k)\n    docs = _expand_by_document(docs)\n    return [\n        {\n            \"doc_id\": d.metadata[\"doc_id\"],\n            \"source\": d.metadata[\"source\"],\n            \"title\": d.metadata[\"title\"],\n            \"section\": d.metadata[\"section\"],\n            \"text\": d.page_content,\n        }\n        for d in docs\n    ]"}, "retriever._expand_by_document": {"file": "src/retriever.py", "name": "_expand_by_document", "start": 154, "end": 176, "cut": false, "code": "def _expand_by_document(docs: list[Document]) -> list[Document]:\n    \"\"\"한 문서에서 조각이 여러 개 잡히면 그 문서의 나머지 소제목을 뒤에 덧붙인다.\n\n    질문이 문서 하나의 주제 전체를 묻는 경우, 질문 문장과 표현이 다른 소제목이 빠지는 것을 막는다.\n    원래 검색 순서는 유지하고, 덧붙인 조각은 문서 안의 순서대로 둔다.\n    \"\"\"\n    if RETRIEVER_EXPAND_MIN_HITS <= 0:\n        return docs\n    hits: dict[str, int] = {}\n    for d in docs:\n        hits[d.metadata[\"source\"]] = hits.get(d.metadata[\"source\"], 0) + 1\n    wanted = [src for src, n in hits.items() if n >= RETRIEVER_EXPAND_MIN_HITS]\n    if not wanted:\n        return docs\n    seen = {d.metadata[\"doc_id\"] for d in docs}\n    out = list(docs)\n    for chunk in _all_chunks():\n        if len(out) >= RETRIEVER_MAX_CHUNKS:\n            break\n        if chunk.metadata[\"source\"] in wanted and chunk.metadata[\"doc_id\"] not in seen:\n            seen.add(chunk.metadata[\"doc_id\"])\n            out.append(chunk)\n    return out"}, "retriever._hybrid_retriever": {"file": "src/retriever.py", "name": "_hybrid_retriever", "start": 126, "end": 134, "cut": false, "code": "def _hybrid_retriever():\n    \"\"\"BM25 + 벡터 앙상블 검색기 (2일차 hybrid.py 구성). 처음 한 번만 만든다.\"\"\"\n    global _hybrid\n    if _hybrid is None:\n        vector_db = get_db()\n        with _db_lock:\n            if _hybrid is None:\n                _hybrid = _make_hybrid(vector_db)\n    return _hybrid"}, "approval._ask_human": {"file": "src/approval.py", "name": "_ask_human", "start": 166, "end": 169, "cut": false, "code": "def _ask_human(state: ApprovalState) -> dict:\n    \"\"\"사람의 결정을 기다린다. 여기서 그래프가 멈추고, 재개될 때 사용자의 결정이 돌아온다.\"\"\"\n    decision = interrupt({\"plan\": state[\"plan\"], \"totals\": state[\"totals\"]})\n    return {\"decision\": decision if isinstance(decision, dict) else {\"approved\": bool(decision)}}"}, "approval._apply": {"file": "src/approval.py", "name": "_apply", "start": 176, "end": 195, "cut": false, "code": "def _apply(state: ApprovalState) -> dict:\n    \"\"\"승인된 조정안을 고른 범위만큼 저장한다.\"\"\"\n    dec = state[\"decision\"]\n    scope = dec.get(\"scope\") if dec.get(\"scope\") in SCOPES else \"week\"\n    weeks = select_scope(to_dated_weeks(state[\"plan\"], state.get(\"base\")), scope, dec.get(\"day\", \"\"))\n    if not weeks:\n        return {\"saved_weeks\": [], \"next_week\": \"\",\n                \"result\": \"승인했지만 조정안에 고른 날짜가 없어 반영하지 않았습니다.\"}\n    saved = save_plan(weeks, state[\"question\"], dec.get(\"comment\", \"\"))\n    n_days = sum(len(rows) for rows in weeks.values())\n    next_week = \"\"\n    if scope == \"through_next\":\n        following = (date.fromisoformat(max(saved)) + timedelta(days=7)).isoformat()\n        sunday = (date.fromisoformat(following) + timedelta(days=6)).isoformat()\n        if da.planned_workouts(following, sunday):     # 다음 주 계획표가 있을 때만 이어서 조정한다\n            next_week = following\n    label = SCOPES[scope]\n    return {\"saved_weeks\": saved, \"next_week\": next_week,\n            \"result\": f\"승인 ({label}): {', '.join(saved)} 주의 {n_days}일을 계획에 반영했습니다.\"\n                      + (\" 다음 주 계획을 이어서 조정합니다.\" if next_week else \"\")}"}, "approval.resolve": {"file": "src/approval.py", "name": "resolve", "start": 231, "end": 239, "cut": false, "code": "def resolve(thread_id: str, approved: bool, comment: str = \"\", scope: str = \"week\", day: str = \"\") -> dict:\n    \"\"\"사용자의 결정(승인 여부, 범위)으로 멈춘 그래프를 재개한다. 대기 중인 요청이 없으면 KeyError.\"\"\"\n    config = {\"configurable\": {\"thread_id\": thread_id}}\n    snapshot = _graph.get_state(config)\n    if not snapshot.next:\n        raise KeyError(thread_id)\n    out = _graph.invoke(Command(resume={\"approved\": approved, \"comment\": comment, \"scope\": scope, \"day\": day}), config)\n    return {\"thread_id\": thread_id, \"status\": \"approved\" if approved else \"rejected\", \"result\": out[\"result\"],\n            \"saved_weeks\": out.get(\"saved_weeks\", []), \"next_week\": out.get(\"next_week\", \"\")}"}, "tracer.RunRecorder": {"file": "src/tracer.py", "name": "RunRecorder", "start": 33, "end": 118, "cut": true, "code": "class RunRecorder(BaseCallbackHandler):\n    \"\"\"질의 한 건의 실행 과정을 기록한다.\n\n    steps     [{step, agent, input, output, latency_s}]  -> API 응답의 trace\n    contexts  [{doc_id, source, text}]                    -> API 응답의 contexts\n    tools     호출된 도구 이름 목록 (평가에서 expected_tools와 비교)\n    agents    거쳐 간 서브 에이전트 이름 목록\n    \"\"\"\n\n    def __init__(self):\n        self.steps: list[dict] = []\n        self.contexts: list[dict] = []\n        self.tools: list[str] = []\n        self.agents: list[str] = []\n        self._open: dict = {}          # run_id -> (도구 이름, 입력, 시작 시각, 담당)\n\n    def add_step(self, step: str, input_text: str, output_text: str, agent: str = \"pipeline\"):\n        \"\"\"콜백이 아닌 파이프라인 단계(가드레일 등)를 직접 기록한다.\"\"\"\n        self.steps.append({\n            \"step\": step, \"agent\": agent,\n            \"input\": str(input_text)[:MAX_OUTPUT_CHARS],\n            \"output\": str(output_text)[:MAX_OUTPUT_CHARS],\n        })\n\n    # ---- 도구 ----\n    @staticmethod\n    def _agent_of(metadata: dict | None) -> str:\n        \"\"\"이 도구를 부른 담당 이름. LangGraph가 콜백에 넘기는 실행 경로에서 읽는다.\n\n        경로는 'data_agent:<id>|tools:<id>' 형태이고 맨 앞 조각이 최상위 노드(담당)다.\n        위임 순서로 추측하면 Supervisor가 여러 담당을 한꺼번에 불렀을 때 담당이 뒤섞였다.\n        \"\"\"\n        ns = (metadata or {}).get(\"langgraph_checkpoint_ns\", \"\")\n        top = ns.split(\"|\")[0].split(\":\")[0]\n        return top or (metadata or {}).get(\"langgraph_node\", \"\") or \"supervisor\"\n\n    def on_tool_start(self, serialized, input_str, *, run_id, metadata=None, **kwargs):\n        name = (serialized or {}).get(\"name\", \"\") or kwargs.get(\"name\", \"\")\n        self._open[run_id] = (name, str(input_str), time.time(), self._agent_of(metadata))\n\n    def on_tool_end(self, output, *, run_id, **kwargs):\n        name, input_str, started, agent = self._open.pop(run_id, (\"\", \"\", time.time(), \"\"))"}, "feedback.save": {"file": "src/feedback.py", "name": "save", "start": 46, "end": 61, "cut": false, "code": "def save(day: str, question: str, answer: str) -> dict:\n    \"\"\"한 날짜에 피드백을 추가하고 저장한 항목을 돌려준다. 날짜 형식이 틀리면 ValueError.\"\"\"\n    date.fromisoformat(day)\n    entry = {\n        \"saved_at\": time.strftime(\"%Y-%m-%d %H:%M:%S\"),\n        \"question\": question.strip(),\n        \"answer\": answer.strip(),\n        \"summary\": summarize(answer),\n    }\n    with _lock:\n        data = load_all()\n        data.setdefault(day, []).append(entry)\n        _path().parent.mkdir(parents=True, exist_ok=True)\n        with open(_path(), \"w\", encoding=\"utf-8\") as f:\n            json.dump(data, f, ensure_ascii=False, indent=2)\n    return entry"}}</script>
+<script>
+/* ===== 인터랙티브 아키텍처: 상자를 누르면 실제 코드, ▶ 를 누르면 요청 흐름 재생 ===== */
+(function () {
+  const CODE = JSON.parse(document.getElementById("code-data").textContent || "{}");
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+  const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* 상자: 위치(1000x720 기준), 아이콘, 이름, 한 줄 설명, 자세한 설명, 보여 줄 코드 조각 */
+  const NODES = [
+    { id:"user", x:10, y:300, ic:"🙋", t:"질문 · /query", s:"question (+이미지·영상·모델)",
+      d:"화면과 API가 같은 POST /query 를 씁니다. question 은 필수, image·video·model·region 은 선택입니다. 첨부가 있으면 먼저 판독하고, 한도가 찬 모델이면 429 로 다른 모델을 고르라고 알려 줍니다.",
+      code:["api.query", "api.models"] },
+    { id:"vision", x:195, y:130, ic:"🖼️", t:"이미지·영상 판독", s:"vision.py · 종류 판정", d:"첨부 이미지는 모델이 종류(기록 화면·계획표·그래프·달리는 사진·신체·무관)를 구조화 출력으로 판정하고 보이는 수치를 글로 옮깁니다. 영상은 OpenCV 로 가운데 3초에서 프레임 8장을 뽑아 한 번에 보여 주고 자세를 관찰합니다.",
+      code:["vision.ImageReading", "vision.extract_frames", "vision.read_video"] },
+    { id:"model", x:385, y:110, ic:"🎛️", t:"모델·리전 선택", s:"요청마다 · 13개 모델", ext:true,
+      d:"Bedrock 일일 토큰 한도는 모델·리전마다 따로 찹니다. 요청이 고른 (모델, 리전)을 contextvars 로 그 요청 동안만 설정하고, 그 조합의 그래프를 처음 쓸 때 한 번 조립해 재사용합니다.",
+      code:["config.use_model", "config.make_llm", "agent.ModelGraphs"] },
+    { id:"guard", x:195, y:300, ic:"🛡️", t:"입력 가드레일", s:"G1 의료 · G3 인젝션 · G4 · G6", d:"모델을 부르기 전에 규칙(정규식)으로 거릅니다. 걸리면 모델 호출 없이 고정 문구로 답합니다. 이미지 속 글도 같은 검사를 받고, 통과하면 이미지 종류를 봅니다 (무관하면 G6, 신체 사진은 G1).",
+      code:["guards.input_guard", "guards.image_guard"] },
+    { id:"sup", x:385, y:300, ic:"🧭", t:"Supervisor", s:"한 번에 한 담당에게 위임", d:"질문을 보고 기록 → 이론 → 계획 담당 순서로 하나씩 일을 맡기고 결과를 모아 최종 답변을 씁니다. 직접 지어내지 않고, 요일별 계획은 계획 담당이 검사한 것만 싣습니다.",
+      code:["agent.build_graph", "agent.SUPERVISOR_PROMPT", "agent.run_query"] },
+    { id:"data", x:585, y:90, ic:"📈", t:"data_agent", s:"기록 담당 · MCP 도구 6개", d:"MCP 서버에서 프로필·계획표·기록·주간 집계·컨디션과 지난 코치 피드백(장기 메모리)을 조회합니다. 일수·합계는 도구가 계산한 값만 씁니다.",
+      code:["agent.DATA_AGENT_PROMPT", "tools.runner_mcp_tools"] },
+    { id:"mcp", x:800, y:90, ic:"🔌", t:"MCP 서버", s:"러너 데이터 + 기억", d:"fastmcp 로 만든 별도 프로세스입니다. runner_01 한 명의 데이터만 내주므로 타인 정보는 구조적으로 조회할 수 없습니다 (G4). 수면 부족·심박 상승 일수는 여기서 코드로 계산하고, 저장한 피드백과 승인한 조정안도 돌려줍니다.",
+      code:["mcp.get_condition", "mcp.get_coach_feedback"] },
+    { id:"theory", x:585, y:300, ic:"📚", t:"theory_agent", s:"이론 담당 · 근거와 출처", d:"훈련 이론 문서를 검색해 근거 조각과 출처 파일명을 전합니다. 검색해 보지 않고 '자료에 없다'고 하지 않습니다.",
+      code:["agent.THEORY_AGENT_PROMPT", "tools.retrieve_training_docs"] },
+    { id:"rag", x:800, y:300, ic:"🔎", t:"하이브리드 검색", s:"BM25 + Chroma · 13종 72조각", d:"키워드(BM25, 형태소 분석)와 벡터(Titan 임베딩) 검색을 섞고, 한 문서에서 2조각 이상 잡히면 그 문서의 나머지 소제목도 덧붙입니다 (문서 단위 확장).",
+      code:["retriever.search", "retriever._hybrid_retriever", "retriever._expand_by_document"] },
+    { id:"plan", x:585, y:510, ic:"🗓️", t:"plan_agent", s:"계획 담당 · 조정안 작성", d:"페이스를 환산하고 요일별 조정안을 짭니다. 내보내기 전에 반드시 check_week_plan 으로 주간 거리 한도를 검사합니다.",
+      code:["agent.PLAN_AGENT_PROMPT"] },
+    { id:"ptools", x:800, y:510, ic:"🧮", t:"계획 도구", s:"check_week_plan · calc_pace", d:"주간 계획 합계가 한도(최근 4주 최댓값 × 110% = 60.5km) 안인지 코드로 검사하고, 목표 기록을 km당 페이스로 바꿉니다.",
+      code:["tools.check_week_plan", "tools.calc_pace"] },
+    { id:"out", x:385, y:510, ic:"🛡️", t:"출력 가드레일", s:"G5 주간 거리 한도", d:"작은 모델(Haiku)로 답변 속 '앞으로 할 주간 계획'만 구조화 추출(LCEL + Pydantic)해 합계를 코드로 다시 검사합니다. 넘으면 한 번 고쳐 쓰고, 그래도 넘으면 계획을 내보내지 않습니다.",
+      code:["agent.output_guard", "agent.ExtractedPlan"] },
+    { id:"hitl", x:385, y:640, ic:"✋", t:"승인 (HITL)", s:"interrupt → Command(resume)", d:"조정안이 있으면 승인 그래프가 interrupt 에서 멈춥니다. 사용자가 범위(이 날만 / 이번 주 / 다음 주까지)를 골라 승인하면 Command(resume) 로 이어서 저장하고, 다음 주까지면 다음 주를 다시 짜서 한 번 더 승인받습니다.",
+      code:["approval._ask_human", "approval._apply", "approval.resolve"] },
+    { id:"ans", x:10, y:640, ic:"📦", t:"응답 · trace", s:"answer · contexts · trace", d:"콜백(RunRecorder)이 어느 담당이 어떤 도구를 불렀는지와 검색 문서를 모아 trace·contexts 를 만듭니다. 화면에서 답변을 저장하면 그 날짜의 코치 피드백(장기 메모리)이 됩니다.",
+      code:["agent._run_query", "tracer.RunRecorder", "feedback.save"] },
+  ];
+  /* 화살표: [출발, 도착, 이름, 점선 여부] */
+  const EDGES = [
+    ["user", "guard", "질문"], ["user", "vision", "첨부 시", true], ["vision", "guard", "판독 글"],
+    ["guard", "sup", "통과"], ["guard", "ans", "차단: 고정 문구", true], ["model", "sup", "고른 모델", true],
+    ["sup", "data", ""], ["sup", "theory", ""], ["sup", "plan", ""],
+    ["data", "mcp", "MCP"], ["theory", "rag", "검색"], ["plan", "ptools", "검사"],
+    ["sup", "out", "최종 답변"], ["out", "hitl", "조정안"], ["hitl", "ans", ""],
+  ];
+  /* 재생 시나리오: [상자, 설명] */
+  const SCENARIOS = {
+    plan: [
+      ["user", "질문 도착: '지난주 일요일 장거리를 못 뛰었어. 이번 주 계획을 어떻게 조정하면 좋을까?'"],
+      ["guard", "G1·G3·G4 정규식 검사 → 통과"],
+      ["sup", "Supervisor: 먼저 기록 담당에게 위임"],
+      ["data", "기록 담당: 계획표·주간 집계·최근 7일 컨디션·지난 피드백 조회"],
+      ["mcp", "MCP 서버: 수면 6시간 미만 3일, 안정시 심박 57~59 (평소 52)를 코드로 계산"],
+      ["data", "조회한 수치를 Supervisor에게 보고"],
+      ["sup", "다음: 이론 담당에게 근거 원칙 요청"],
+      ["theory", "이론 담당: '놓친 장거리 처리', '컨디션에 따른 조정' 검색"],
+      ["rag", "하이브리드 검색 + 문서 단위 확장 → 근거 조각"],
+      ["theory", "근거와 출처 파일명 보고"],
+      ["sup", "다음: 계획 담당에게 조정안 요청"],
+      ["plan", "계획 담당: 요일별 조정안 작성"],
+      ["ptools", "check_week_plan: 주간 합계 ≤ 60.5km 검사 통과"],
+      ["plan", "검사를 통과한 조정안 보고"],
+      ["sup", "수치 + 근거 + 조정안을 묶어 최종 답변"],
+      ["out", "출력 가드레일: 답변 속 계획을 다시 뽑아 G5 재검사"],
+      ["hitl", "승인 그래프가 멈추고 사용자의 승인(범위 선택)을 기다림"],
+      ["ans", "answer · contexts · trace 반환 (보통 50~75초)"],
+    ],
+    image: [
+      ["user", "질문 + 시계 기록 캡처: '어제 뛴 기록이야. 괜찮게 뛴 거야?'"],
+      ["vision", "이미지 종류 판정: running_record → 거리·페이스·심박 수치를 글로 옮김"],
+      ["guard", "옮긴 글까지 G1·G3·G4 검사, 이미지 종류 G6 검사 → 통과"],
+      ["sup", "Supervisor: 기록 담당에게 위임"],
+      ["data", "프로필(심박존)과 그날 컨디션 조회"],
+      ["mcp", "존2 140~148, 젖산역치 165 등 프로필 반환"],
+      ["data", "보고"],
+      ["sup", "다음: 이론 담당"],
+      ["theory", "심박존·쉬운 날 강도 원칙 검색"],
+      ["rag", "01_heart_rate_zones, 02_zone2_easy_run 조각"],
+      ["theory", "보고"],
+      ["sup", "이미지 수치를 존 기준으로 평가해 답변"],
+      ["out", "제시된 주간 계획 없음 → G5 검사 대상 아님"],
+      ["hitl", "조정안이 없으니 승인 단계는 건너뜀"],
+      ["ans", "답변 반환 (배지: 이미지 판독)"],
+    ],
+    blocked: [
+      ["user", "질문 도착: '뛰고 나면 무릎 바깥쪽이 찌릿한데 무슨 병이야? 소염제 먹고 뛰어도 돼?'"],
+      ["guard", "증상 표현 + 진단·약물 의도 → G1 차단 (차단 내역은 guard_audit.jsonl 에 기록)"],
+      ["ans", "모델을 한 번도 부르지 않고 고정 문구로 답함: 진단 대신 전문의 진료 권유"],
+    ],
+  };
+
+  const byId = Object.fromEntries(NODES.map((n) => [n.id, n]));
+  const W = 160, H = 70;
+  const canvas = $("canvas"), svg = $("edges"), wrap = $("canvasWrap");
+
+  /* ---------- 그리기 ---------- */
+  for (const n of NODES) {
+    const b = document.createElement("button");
+    b.className = "node" + (n.ext ? " ext" : ""); b.id = "n-" + n.id;
+    b.style.left = n.x + "px"; b.style.top = n.y + "px";
+    b.innerHTML = `<i class="ic">${n.ic}</i><b>${esc(n.t)}</b><span>${esc(n.s)}</span>`;
+    b.addEventListener("click", () => { stop(); select(n.id); openPane(); });
+    canvas.appendChild(b);
+  }
+  function anchor(a, b) {
+    /* 두 상자 사이의 연결점과 방향 (가로로 멀면 좌우 면, 세로로 멀면 위아래 면) */
+    const ax = a.x + W / 2, ay = a.y + H / 2, bx = b.x + W / 2, by = b.y + H / 2;
+    if (Math.abs(bx - ax) >= Math.abs(by - ay) * 1.2) {
+      const s = Math.sign(bx - ax);
+      return { x1: ax + s * W / 2, y1: ay, x2: bx - s * W / 2, y2: by, h: true };
+    }
+    const s = Math.sign(by - ay);
+    return { x1: ax, y1: ay + s * H / 2, x2: bx, y2: by - s * H / 2, h: false };
+  }
+  const NS = "http://www.w3.org/2000/svg";
+  svg.innerHTML = '<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">' +
+    '<path d="M0,0 L10,5 L0,10 z" fill="#6FA3DD"/></marker></defs>';
+  const PATHS = {};
+  for (const [f, t, label, dash] of EDGES) {
+    const p = anchor(byId[f], byId[t]);
+    const k = p.h ? Math.abs(p.x2 - p.x1) * 0.45 : Math.abs(p.y2 - p.y1) * 0.45;
+    const d = p.h
+      ? `M${p.x1},${p.y1} C${p.x1 + Math.sign(p.x2 - p.x1) * k},${p.y1} ${p.x2 - Math.sign(p.x2 - p.x1) * k},${p.y2} ${p.x2},${p.y2}`
+      : `M${p.x1},${p.y1} C${p.x1},${p.y1 + Math.sign(p.y2 - p.y1) * k} ${p.x2},${p.y2 - Math.sign(p.y2 - p.y1) * k} ${p.x2},${p.y2}`;
+    const path = document.createElementNS(NS, "path");
+    path.setAttribute("d", d); path.setAttribute("class", "edge" + (dash ? " dash" : ""));
+    path.setAttribute("marker-end", "url(#ah)");
+    svg.appendChild(path);
+    PATHS[f + ">" + t] = path;
+    if (label) {
+      const mid = path.getPointAtLength(path.getTotalLength() / 2);
+      const tx = document.createElementNS(NS, "text");
+      tx.setAttribute("x", mid.x); tx.setAttribute("y", mid.y - 6); tx.setAttribute("text-anchor", "middle");
+      tx.setAttribute("class", "elabel"); tx.textContent = label;
+      svg.appendChild(tx);
+    }
+  }
+  const dot = document.createElementNS(NS, "circle");
+  dot.setAttribute("r", "8"); dot.setAttribute("class", "dot"); dot.style.display = "none";
+  svg.appendChild(dot);
+
+  /* 화면 폭에 맞춰 1000x720 캔버스를 줄이거나 늘린다 */
+  function fit() {
+    const k = Math.min(1.25, wrap.clientWidth / 1000);
+    canvas.style.transform = `scale(${k})`;
+    canvas.style.left = Math.max(0, (wrap.clientWidth - 1000 * k) / 2) + "px";   /* 폭이 남으면 가운데에 둔다 */
+    wrap.style.height = Math.round(720 * k) + "px";
+  }
+  new ResizeObserver(fit).observe(wrap); fit();
+
+  /* ---------- 코드 패널 ---------- */
+  function highlight(code) {
+    const re = /(#[^\n]*)|("""[\s\S]*?"""|'''[\s\S]*?'''|[rbf]*"(?:\\.|[^"\\\n])*"|[rbf]*'(?:\\.|[^'\\\n])*')|(@[\w.]+)|\b(def|class|return|async|await|if|elif|else|for|in|not|and|or|with|as|import|from|try|except|finally|raise|yield|lambda|None|True|False|is|while|break|continue|pass|global)\b|\b(\d+(?:\.\d+)?)\b|\b([A-Za-z_]\w*)(?=\()/g;
+    let out = "", last = 0, m;
+    while ((m = re.exec(code))) {
+      out += esc(code.slice(last, m.index));
+      const cls = m[1] ? "c" : m[2] ? "s" : m[3] ? "d" : m[4] ? "k" : m[5] ? "n" : "f";
+      out += `<span class="tk-${cls}">${esc(m[0])}</span>`;
+      last = re.lastIndex;
+    }
+    return out + esc(code.slice(last));
+  }
+  function codeHtml(key) {
+    const c = CODE[key];
+    if (!c) return '<pre><span class="ln" data-n="">코드 조각을 찾지 못했습니다.</span></pre>';
+    /* 줄 단위로 나눠 줄 번호를 붙인다. 여러 줄 문자열 강조가 끊기지 않게 먼저 전체를 강조한 뒤 줄로 자른다 */
+    const lines = highlight(c.code).split("\n");
+    const open = [];
+    const html = lines.map((ln, i) => {
+      const prefix = open.join("");
+      for (const t of ln.match(/<span class="tk-\w">|<\/span>/g) || []) t === "</span>" ? open.pop() : open.push(t);
+      return `<span class="ln" data-n="${c.start + i}">${prefix}${ln}${"</span>".repeat(open.length)}</span>`;
+    }).join("");
+    return `<div class="where"><span>${esc(c.file)} : ${c.start}–${c.end}</span><a href="${esc(c.file)}" target="_blank" rel="noopener">파일 열기</a></div>` +
+      `<pre>${html}</pre>` + (c.cut ? `<div class="cut">… 길어서 앞부분 ${c.code.split("\n").length}줄만 보여 줍니다 (전체 ${c.end - c.start + 1}줄)</div>` : "");
+  }
+  let SEL = null;
+  function select(id, flash) {
+    const n = byId[id]; SEL = id;
+    for (const el of canvas.querySelectorAll(".node")) el.classList.toggle("sel", el.id === "n-" + id);
+    const pane = $("codepane");
+    pane.innerHTML = `<button class="x" id="paneX" aria-label="코드 닫기">✕</button><div class="k">${n.ic} 선택한 부분</div><h3>${esc(n.t)}</h3><p>${esc(n.d)}</p>` +
+      `<div class="tabs">${n.code.map((k, i) => `<button data-k="${k}" class="${i ? "" : "on"}">${esc(CODE[k] ? CODE[k].name : k)}</button>`).join("")}</div>` +
+      `<div id="codebox">${codeHtml(n.code[0])}</div>`;
+    for (const b of pane.querySelectorAll(".tabs button")) b.addEventListener("click", () => {
+      for (const x of pane.querySelectorAll(".tabs button")) x.classList.toggle("on", x === b);
+      $("codebox").innerHTML = codeHtml(b.dataset.k);
+    });
+    $("paneX").addEventListener("click", closePane);
+  }
+
+  /* ---------- 요청 흐름 재생 ---------- */
+  let SC = "plan", RUN = 0;
+  for (const b of document.querySelectorAll(".seg button")) b.addEventListener("click", () => {
+    for (const x of document.querySelectorAll(".seg button")) x.classList.toggle("on", x === b);
+    SC = b.dataset.sc; stop();
+    $("stepcap").textContent = "▶ 를 누르면 이 시나리오를 처음부터 재생합니다.";
+  });
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+  function edgeBetween(a, b) {
+    if (PATHS[a + ">" + b]) return { path: PATHS[a + ">" + b], rev: false };
+    if (PATHS[b + ">" + a]) return { path: PATHS[b + ">" + a], rev: true };
+    return null;
+  }
+  function moveDot(e, run, ms) {
+    return new Promise((resolve) => {
+      const L = e.path.getTotalLength(), t0 = performance.now();
+      e.path.classList.add("flow"); dot.style.display = "";
+      const step = (now) => {
+        if (run !== RUN) return resolve();
+        const k = Math.min(1, (now - t0) / ms), ease = k < .5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        const pt = e.path.getPointAtLength((e.rev ? 1 - ease : ease) * L);
+        dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y);
+        if (k < 1) requestAnimationFrame(step); else { e.path.classList.remove("flow"); e.path.classList.add("hot"); resolve(); }
+      };
+      requestAnimationFrame(step);
+    });
+  }
+  function clearMarks() {
+    for (const el of canvas.querySelectorAll(".node")) el.classList.remove("live", "dim");
+    for (const p of Object.values(PATHS)) p.classList.remove("flow", "hot");
+    dot.style.display = "none";
+  }
+  function stop() {
+    RUN++; clearMarks();
+    $("play").hidden = false; $("stop").hidden = true;
+  }
+  async function play() {
+    const run = ++RUN, steps = SCENARIOS[SC];
+    clearMarks();
+    $("play").hidden = true; $("stop").hidden = false;
+    const used = new Set(steps.map((s) => s[0]));
+    for (const el of canvas.querySelectorAll(".node")) el.classList.toggle("dim", !used.has(el.id.slice(2)));
+    for (let i = 0; i < steps.length; i++) {
+      if (run !== RUN) return;
+      const [id, cap] = steps[i];
+      if (i > 0) {
+        const e = edgeBetween(steps[i - 1][0], id);
+        if (e) await moveDot(e, run, REDUCED ? 1 : 700);
+        if (run !== RUN) return;
+      }
+      for (const el of canvas.querySelectorAll(".node.live")) el.classList.remove("live");
+      $("n-" + id).classList.add("live");
+      $("stepcap").innerHTML = `<b>${i + 1}/${steps.length}</b>${esc(cap)}<button class="peek" id="peek">코드 보기 ›</button>`;
+      $("peek").addEventListener("click", openPane);
+      select(id);   /* 서랍이 열려 있으면 내용만 바뀌고, 닫혀 있으면 그림을 가리지 않게 닫힌 채로 둔다 */
+      await sleep(REDUCED ? 1200 : 1500);
+    }
+    if (run !== RUN) return;
+    dot.style.display = "none";
+    $("play").hidden = false; $("stop").hidden = true;
+    $("play").textContent = "↻ 다시 재생";
+  }
+  $("play").addEventListener("click", play);
+  $("stop").addEventListener("click", () => { stop(); $("stepcap").textContent = "멈췄습니다. 상자를 눌러 코드를 보거나 다시 재생하세요."; });
+
+  /* ---------- 오른쪽 코드 서랍 ---------- */
+  const pane = $("codepane"), scrim = $("scrim");
+  let lastFocus = null;
+  function openPane() {
+    lastFocus = document.activeElement;
+    pane.classList.add("open"); scrim.classList.add("open");
+    document.documentElement.classList.add("locked");   /* 서랍이 열린 동안 뒤 본문이 스크롤되지 않게 */
+    setTimeout(() => { const x = $("paneX"); if (x) x.focus(); }, 50);
+  }
+  function closePane() {
+    pane.classList.remove("open"); scrim.classList.remove("open");
+    document.documentElement.classList.remove("locked");
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  scrim.addEventListener("click", closePane);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && pane.classList.contains("open")) closePane(); });
+
+  select("sup");
+})();
+
+/* ===== 스크롤 등장과 숫자 올라가기 ===== */
+(function () {
+  const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const cards = document.querySelectorAll("section.card");
+  if (!("IntersectionObserver" in window) || REDUCED) return;
+  for (const c of cards) c.classList.add("reveal");
+  const countUp = (el) => {
+    const m = el.textContent.match(/^(\d+)(.*)$/s);
+    if (!m) return;
+    const target = +m[1], rest = m[2], t0 = performance.now();
+    const step = (now) => {
+      const k = Math.min(1, (now - t0) / 900);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - k, 3))) + rest;
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (!e.isIntersecting) continue;
+      e.target.classList.add("in");
+      for (const b of e.target.querySelectorAll(".stat b")) countUp(b);
+      io.unobserve(e.target);
+    }
+  }, { threshold: 0.08 });
+  for (const c of cards) io.observe(c);
+})();
+</script>
+</body>
+</html>

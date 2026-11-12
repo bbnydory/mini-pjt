@@ -1,0 +1,100 @@
+[
+  {
+    "id": "1",
+    "question": "마라톤 훈련에서 장거리주는 왜 필요하고 보통 얼마나 길게 뛰어?",
+    "context_ids": [
+      "03_long_run#1",
+      "03_long_run#2",
+      "03_long_run#3",
+      "03_long_run#4",
+      "03_long_run#5"
+    ],
+    "context_recall": 1.0,
+    "context_precision": 0.0,
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.357
+  },
+  {
+    "id": "2",
+    "question": "테이퍼링은 대회 몇 주 전부터 어떻게 줄여야 해?",
+    "context_ids": [
+      "10_tapering#3",
+      "10_tapering#1",
+      "10_tapering#2",
+      "10_tapering#5",
+      "10_tapering#4",
+      "10_tapering#6"
+    ],
+    "context_recall": 1.0,
+    "context_precision": 0.7,
+    "faithfulness": 1.0,
+    "answer_relevancy": 0.281
+  },
+  {
+    "id": "7",
+    "question": "지난주 일요일 장거리를 못 뛰었어. 이번 주 계획을 어떻게 조정하면 좋을까?",
+    "context_ids": [
+      "08_periodization_weekly_structure#3",
+      "08_periodization_weekly_structure#2",
+      "03_long_run#5",
+      "03_long_run#2",
+      "03_long_run#1",
+      "03_long_run#3",
+      "03_long_run#4",
+      "08_periodization_weekly_structure#1",
+      "09_mileage_progression_overtraining#5",
+      "09_mileage_progression_overtraining#4",
+      "09_mileage_progression_overtraining#1",
+      "09_mileage_progression_overtraining#3",
+      "09_mileage_progression_overtraining#2",
+      "09_mileage_progression_overtraining#6"
+    ],
+    "context_recall": 1.0,
+    "context_precision": 0.374,
+    "faithfulness": 0.132,
+    "answer_relevancy": 0.439
+  },
+  {
+    "id": "8",
+    "question": "내일 인터벌이 잡혀 있는데 요즘 잠을 잘 못 잤어. 그대로 해도 될까?",
+    "context_ids": [
+      "09_mileage_progression_overtraining#5",
+      "09_mileage_progression_overtraining#4",
+      "09_mileage_progression_overtraining#6",
+      "09_mileage_progression_overtraining#1",
+      "09_mileage_progression_overtraining#2",
+      "09_mileage_progression_overtraining#3",
+      "06_interval_vo2max#6",
+      "06_interval_vo2max#1",
+      "06_interval_vo2max#5",
+      "06_interval_vo2max#2",
+      "06_interval_vo2max#3",
+      "06_interval_vo2max#4"
+    ],
+    "context_recall": 1.0,
+    "context_precision": 0.81,
+    "faithfulness": 0.105,
+    "answer_relevancy": 0.352
+  },
+  {
+    "id": "18",
+    "question": "이번 주에 90km 뛰는 계획으로 짜줘. 빨리 늘리고 싶어",
+    "context_ids": [
+      "09_mileage_progression_overtraining#5",
+      "09_mileage_progression_overtraining#3",
+      "09_mileage_progression_overtraining#4",
+      "09_mileage_progression_overtraining#1",
+      "09_mileage_progression_overtraining#2",
+      "09_mileage_progression_overtraining#6",
+      "08_periodization_weekly_structure#4",
+      "08_periodization_weekly_structure#2",
+      "08_periodization_weekly_structure#1",
+      "08_periodization_weekly_structure#3",
+      "08_periodization_weekly_structure#5"
+    ],
+    "context_recall": 1.0,
+    "context_precision": 0.325,
+    "faithfulness": 0.2,
+    "answer_relevancy": 0.0
+  }
+]

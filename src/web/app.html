@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Do+Hyeon&family=Jua&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<title>TEMPO · 마라톤 훈련 조정 코치</title>
+<style>
+  /* 데스크톱 3단 화면: 왼쪽 코치 채팅 · 가운데 주간 훈련 · 오른쪽 선택한 날의 상세.
+     microsoft.com 홈페이지 느낌: 흰 바탕과 회색(#F2F2F2), 파란(#0067B8) 사각 버튼, 거의 각진 모서리, 그림자로 카드 구분.
+     글꼴은 제목 도현체·버튼과 칩 주아체. 폭이 좁으면 2단, 1단으로 접힌다. */
+  :root {
+    --bg:#F2F2F2; --panel:#FFFFFF; --raised:#FAFAFA; --hover:#F0F6FD; --line:#E0E0E0; --ink:#242424; --muted:#616161; --faint:#A19F9D;
+    --acc:#0067B8; --acc-d:#EBF3FC; --lime:#005A9E; --red:#C50F1F; --red-d:#FDE7E9; --ok:#107C10; --ok-d:#DFF6DD;
+    --z1:#A19F9D; --z2:#0078D4; --z3:#13A10E; --z4:#FFB900; --z5:#F7630C;
+    --num:"Inter","Pretendard","Noto Sans KR",system-ui,sans-serif;
+    --title:"Do Hyeon","Noto Sans KR",sans-serif; --fun:"Jua","Noto Sans KR",sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  body { margin:0; background:var(--bg); color:var(--ink); overflow:hidden;
+    font:14.5px/1.55 "Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; }
+  button { font:inherit; color:inherit; cursor:pointer; }
+  [hidden] { display:none !important; }
+  :focus-visible { outline:2px solid var(--acc); outline-offset:2px; }
+  .n { font-family:var(--num); font-weight:700; letter-spacing:-.01em; font-variant-numeric:tabular-nums; }
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb { background:var(--line); border-radius:4px; border:2px solid var(--bg); }
+
+  /* ---------- 상단 바 ---------- */
+  .top { height:60px; display:flex; align-items:center; gap:16px; padding:0 20px; border-bottom:1px solid var(--line);
+    background:#fff; }
+  .brand { display:flex; align-items:center; gap:10px; }
+  .logo { width:30px; height:30px; border-radius:4px; background:linear-gradient(135deg,var(--acc),var(--lime));
+    display:grid; place-items:center; color:#fff; font-weight:900; font-family:var(--num); font-size:15px; }
+  .brand b { font-family:var(--num); font-weight:900; font-size:19px; letter-spacing:.12em; }
+  .brand span { color:var(--muted); font-size:12.5px; }
+  .top .meta { display:flex; gap:10px; align-items:center; margin-left:auto; }
+  .pill { display:flex; gap:8px; align-items:center; background:var(--panel); border:1px solid var(--line); border-radius:2px;
+    padding:5px 14px; font-size:12.5px; color:var(--muted); white-space:nowrap; }
+  .pill b { color:var(--ink); }
+  .pill i { font-style:normal; color:#fff; background:var(--lime); border-radius:2px; padding:0 8px; font-weight:800; font-family:var(--num); }
+  .debug { display:flex; align-items:center; gap:8px; text-decoration:none; font-weight:800; font-size:13px; color:#fff;
+    background:var(--acc); border-radius:4px; padding:8px 14px; white-space:nowrap; box-shadow:0 0 0 3px var(--acc-d); }
+  .debug:hover { filter:brightness(1.1); }
+  .debug small { font-weight:600; opacity:.75; }
+
+  /* ---------- 단 구성 ---------- */
+  /* 단 너비는 사이의 손잡이를 끌어 바꾼다 (--chat-w, --detail-w). 두 번 누르면 기본값 */
+  :root { --chat-w:400px; --detail-w:360px; }
+  .app { height:calc(100% - 60px); display:grid; grid-template-columns:var(--chat-w) 6px minmax(0,1fr); }
+  .work { display:grid; grid-template-columns:minmax(0,1fr) 6px var(--detail-w); min-height:0; }
+  .gutter { cursor:col-resize; background:var(--bg); position:relative; touch-action:none; }
+  .gutter::after { content:""; position:absolute; top:50%; left:1px; width:4px; height:44px; margin-top:-22px;
+    border-radius:4px; background:var(--line); transition:background .15s; }
+  .gutter:hover::after, .gutter:focus-visible::after, .gutter.drag::after { background:var(--acc); }
+  .gutter:focus-visible { outline:none; }
+  body.resizing { cursor:col-resize; user-select:none; }
+  body.resizing iframe, body.resizing video { pointer-events:none; }
+  .col { min-height:0; overflow:auto; }
+  .chat { border-right:1px solid var(--line); background:var(--panel); display:flex; flex-direction:column; overflow:hidden; min-height:0; }
+  .main { padding:22px 24px 40px; display:flex; flex-direction:column; gap:18px; }
+  .detail { border-left:1px solid var(--line); padding:22px 20px 40px; display:flex; flex-direction:column; gap:14px; background:#FAFAFA; }
+  @media (max-width:1279px) {
+    #g2 { display:none; }
+    .work { display:block; overflow:auto; }
+    .work .col { overflow:visible; }
+    .detail { border-left:0; border-top:1px solid var(--line); }
+  }
+  @media (max-width:899px) {
+    body { overflow:auto; }
+    #g1 { display:none; }
+    .app { display:flex; flex-direction:column-reverse; height:auto; }
+    .work { overflow:visible; }
+    .chat { border-right:0; border-top:1px solid var(--line); height:85vh; }
+    .top { height:auto; flex-wrap:wrap; padding:10px 16px; }
+    .top .meta { margin-left:0; flex-wrap:wrap; }
+    .main, .detail { padding:18px 16px 28px; }
+  }
+
+  h2 { margin:0; font-size:12.5px; letter-spacing:.08em; color:var(--muted); font-weight:800; }
+  .sec { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+  .hint { color:var(--faint); font-size:12.5px; }
+
+  /* ---------- 가운데: 주간 ---------- */
+  .weeknav { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .weeknav .t b { font-size:28px; letter-spacing:-.02em; display:block; line-height:1.2; }
+  .weeknav .t span { font-size:13px; color:var(--acc); font-weight:700; }
+  .weeknav .btns { display:flex; gap:6px; }
+  .weeknav button { height:38px; min-width:38px; padding:0 12px; background:var(--raised); border:1px solid var(--line); border-radius:4px; font-weight:800; }
+  .weeknav button:hover:not(:disabled) { border-color:var(--acc); color:var(--acc); }
+  .weeknav button:disabled { opacity:.3; cursor:default; }
+
+  .stats { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+  .stat { background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:14px 16px; }
+  .stat .l { font-size:12px; color:var(--muted); }
+  .stat .v { font-size:26px; line-height:1.25; }
+  .stat .v small { font-size:12.5px; color:var(--muted); font-weight:500; margin-left:3px; }
+  .stat .v.warn { color:var(--red); }
+  .bar { height:6px; background:var(--raised); border-radius:4px; overflow:hidden; margin-top:8px; }
+  .bar span { display:block; height:100%; background:linear-gradient(90deg,var(--acc),var(--lime)); border-radius:4px; }
+  @media (max-width:640px) { .stats { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+  .days { display:flex; flex-direction:column; gap:8px; }
+  .wk { --c:var(--faint); display:grid; grid-template-columns:52px minmax(0,1fr) 150px; gap:14px; align-items:center; width:100%;
+    text-align:left; background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:12px 16px 12px 14px; position:relative; }
+  .wk::before { content:""; position:absolute; left:0; top:12px; bottom:12px; width:3px; border-radius:3px; background:var(--c); }
+  .wk:hover { background:var(--hover); }
+  .wk.sel { border-color:var(--acc); box-shadow:0 0 0 1px var(--acc) inset; }
+  .wk .d { text-align:center; line-height:1.2; }
+  .wk .d b { display:block; font-size:22px; }
+  .wk .d span { font-size:12px; color:var(--muted); }
+  .wk.today .d b { color:var(--lime); }
+  .wk .info { min-width:0; display:flex; flex-direction:column; gap:4px; }
+  .wk .name { display:flex; align-items:center; gap:8px; flex-wrap:wrap; font-size:15.5px; font-weight:800; }
+  .wk .name .km { color:var(--c); }
+  .wk .facts { display:flex; flex-wrap:wrap; gap:2px 12px; font-size:12.5px; color:var(--muted); }
+  .wk .facts b { color:var(--ink); font-weight:600; }
+  .wk .note { font-size:12.5px; display:flex; gap:6px; min-width:0; }
+  .wk .note span { overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .wk .note i { font-style:normal; color:var(--acc); font-weight:800; flex:none; }
+  .wk.rest { opacity:.7; }
+  @media (max-width:640px) { .wk { grid-template-columns:44px minmax(0,1fr); } .wk .prof { display:none; } }
+
+  .st { font-size:11px; font-weight:800; border-radius:4px; padding:1px 7px; letter-spacing:.02em; }
+  .st.completed { background:var(--ok-d); color:var(--ok); }
+  .st.missed { background:var(--red-d); color:var(--red); }
+  .st.upcoming { background:var(--raised); color:var(--muted); }
+  .st.today { background:var(--lime); color:#fff; }
+
+  /* 강도 프로필 (훈련 유형별 모양) */
+  .prof { display:flex; align-items:flex-end; gap:1px; height:40px; }
+  .prof span { display:block; border-radius:2px 2px 0 0; min-width:2px; }
+  .prof.big { height:72px; gap:2px; }
+  .legend { display:flex; flex-wrap:wrap; gap:4px 12px; font-size:11.5px; color:var(--muted); }
+  .legend i { display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:4px; vertical-align:-1px; }
+
+  /* ---------- 오른쪽: 상세 ---------- */
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:4px; padding:14px 16px; }
+  .dhead .ty { font-size:12px; font-weight:800; color:var(--c); letter-spacing:.04em; }
+  .dhead h3 { margin:2px 0; font-size:21px; }
+  .dhead p { margin:0; color:var(--muted); font-size:13px; }
+  .grid2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+  .grid2 > div { background:var(--raised); border-radius:4px; padding:9px 12px; }
+  .grid2 .l { font-size:11.5px; color:var(--muted); }
+  .grid2 .v { font-size:17px; }
+  .grid2 .v.warn { color:var(--red); }
+  .grid2 .v small { font-size:11.5px; color:var(--muted); font-weight:500; }
+  .askthis { width:100%; background:var(--acc-d); color:var(--acc); border:1px solid var(--acc); border-radius:4px; padding:10px; font-weight:800; }
+  .askthis:hover { background:#CFE4FA; }
+  .fb { background:var(--raised); border-radius:4px; padding:12px 14px; }
+  .fb .q { font-size:12.5px; color:var(--acc); margin-bottom:6px; font-weight:700; }
+  .fb .meta { display:flex; justify-content:space-between; gap:8px; font-size:11.5px; color:var(--faint); margin-top:8px; }
+  .fb .meta button { background:none; border:0; color:var(--muted); font-size:11.5px; text-decoration:underline; padding:0; }
+  .fb .answer { max-height:260px; overflow:auto; font-size:13.5px; }
+  .empty { color:var(--muted); font-size:13px; margin:0; }
+
+  /* ---------- 왼쪽: 채팅 ---------- */
+  .chat .head { padding:16px 18px 12px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
+  .chat .head .av { width:34px; height:34px; border-radius:50%; background:var(--acc-d); color:var(--acc); display:grid; place-items:center; font-weight:900; flex:none; }
+  .chat .head b { display:block; font-size:15px; }
+  .chat .head span { font-size:12px; color:var(--muted); }
+  .chat .head .clear { margin-left:auto; background:none; border:1px solid var(--line); border-radius:4px; color:var(--muted); font-size:12px; padding:4px 10px; flex:none; }
+  .thread { flex:1; min-height:0; overflow:auto; padding:16px 16px 8px; display:flex; flex-direction:column; gap:12px; }
+  .msg.me { align-self:flex-end; max-width:88%; background:var(--acc); color:#fff; border-radius:4px 4px 4px 4px; padding:9px 13px; font-weight:600; }
+  .msg.me .ctx { display:block; font-size:11.5px; font-weight:800; opacity:.7; margin-bottom:2px; }
+  .msg.bot { align-self:stretch; background:var(--raised); border:1px solid var(--line); border-radius:4px 4px 4px 4px; padding:12px 14px; }
+  .msg.wait { align-self:flex-start; color:var(--muted); font-size:13px; background:var(--raised); border-radius:4px; padding:9px 13px; }
+  .dots i { display:inline-block; width:6px; height:6px; margin-right:3px; border-radius:50%; background:var(--acc); animation:b 1s infinite; }
+  .dots i:nth-child(2) { animation-delay:.15s; } .dots i:nth-child(3) { animation-delay:.3s; }
+  @keyframes b { 0%,80%,100% { opacity:.25; } 40% { opacity:1; } }
+  @media (prefers-reduced-motion:reduce) { .dots i { animation:none; } }
+  .welcome { color:var(--muted); font-size:13.5px; background:var(--raised); border-radius:4px; padding:14px; }
+  .welcome b { color:var(--ink); }
+  .compose { border-top:1px solid var(--line); padding:12px 14px 14px; display:flex; flex-direction:column; gap:8px; background:var(--panel); }
+  .ctxchip { display:flex; align-items:center; gap:8px; background:var(--acc-d); color:var(--acc); border-radius:4px; padding:5px 8px 5px 10px; font-size:12.5px; font-weight:700; }
+  .ctxchip span { flex:1; min-width:0; overflow:hidden; white-space:nowrap; text-overflow:ellipsis; }
+  .ctxchip button { background:none; border:0; color:var(--acc); padding:0 4px; font-size:14px; }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chips button { background:transparent; border:1px solid var(--line); border-radius:2px; padding:4px 11px; font-size:12.5px; color:var(--muted); text-align:left; }
+  .chips button:hover { border-color:var(--acc); color:var(--acc); }
+  .inrow { display:flex; gap:8px; align-items:flex-end; }
+  textarea { flex:1; min-height:44px; max-height:160px; resize:vertical; padding:10px 12px; border-radius:4px; border:1px solid var(--line);
+    background:var(--bg); color:var(--ink); font:inherit; }
+  textarea:focus { border-color:var(--acc); outline:none; }
+  .send { background:var(--acc); color:#fff; border:0; border-radius:4px; height:44px; padding:0 16px; font-weight:900; }
+  .send:disabled { opacity:.4; cursor:default; }
+  .kbd { font-size:11.5px; color:var(--faint); }
+
+  /* 답변 */
+  .badges { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:8px; }
+  .badge { font-size:11px; padding:2px 8px; border-radius:2px; background:var(--ok-d); color:var(--ok); font-weight:800; }
+  .badge.warn { background:var(--red-d); color:var(--red); }
+  .badge.plain { background:var(--bg); color:var(--muted); font-weight:600; }
+  .answer { overflow-wrap:anywhere; font-size:14px; }
+  .answer h3,.answer h4,.answer h5 { margin:12px 0 4px; font-size:14.5px; color:var(--acc); }
+  .answer p { margin:6px 0; }
+  .answer ul,.answer ol { margin:4px 0; padding-left:20px; }
+  .answer strong { color:var(--ink); }
+  .answer hr { border:0; border-top:1px solid var(--line); margin:10px 0; }
+  .answer blockquote { margin:8px 0; padding:4px 10px; border-left:3px solid var(--acc); color:var(--muted); }
+  .answer code { background:var(--bg); padding:1px 5px; border-radius:4px; font-size:12.5px; }
+  .tablewrap { overflow-x:auto; margin:8px 0; }
+  table { border-collapse:collapse; font-size:13px; font-variant-numeric:tabular-nums; }
+  th,td { border:1px solid var(--line); padding:4px 9px; text-align:left; white-space:nowrap; }
+  th { background:var(--bg); color:var(--muted); }
+  details { border-top:1px solid var(--line); padding:8px 0 0; margin-top:8px; }
+  summary { cursor:pointer; font-weight:700; font-size:12.5px; color:var(--muted); }
+  .item { border:1px solid var(--line); border-radius:4px; padding:7px 9px; margin-top:6px; }
+  .item .head { display:flex; flex-wrap:wrap; gap:4px 8px; font-size:12px; margin-bottom:3px; }
+  .item .head span { color:var(--muted); }
+  pre { margin:3px 0 0; padding:7px 9px; background:var(--bg); border-radius:4px; font-size:12px; white-space:pre-wrap; color:#323130;
+    overflow-wrap:anywhere; max-height:180px; overflow:auto; font-family:ui-monospace,"Cascadia Mono",Consolas,monospace; }
+  .save { margin-top:10px; display:flex; align-items:center; gap:8px; }
+  .save button { background:transparent; border:1px solid var(--acc); color:var(--acc); border-radius:4px; padding:6px 12px; font-weight:800; font-size:12.5px; }
+  .save button.ok { border-color:var(--ok); color:var(--ok); }
+  .save span { font-size:12px; color:var(--muted); }
+
+  /* 모델 선택 (사용 한도가 찬 모델을 피한다) */
+  .modelbar { display:flex; gap:8px; padding:8px 18px; border-bottom:1px solid var(--line); flex-wrap:wrap; }
+  .modelbar label { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); }
+  .modelbar select { background:var(--bg); color:var(--ink); border:1px solid var(--line); border-radius:4px; padding:4px 8px; font:inherit; font-size:12.5px; max-width:230px; }
+  .modelbar select.warn { border-color:var(--red); box-shadow:0 0 0 2px var(--red-d); }
+
+  /* 이미지 첨부 */
+  .attach { background:var(--raised); border:1px solid var(--line); border-radius:4px; height:44px; width:44px; font-size:18px; flex:none; }
+  .attach:hover { border-color:var(--acc); }
+  .preview { display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--muted); }
+  .preview img, .preview video { height:48px; border-radius:4px; border:1px solid var(--line); }
+  .preview button { background:none; border:0; color:var(--muted); font-size:14px; }
+  .msg.me img { display:block; max-width:180px; border-radius:4px; margin-bottom:6px; }
+
+  /* 조정안 승인 (HITL) */
+  .appr { margin-top:10px; border:1px solid var(--lime); border-radius:4px; padding:12px; background:#F0F6FD; }
+  .appr .t { font-weight:800; color:var(--lime); font-size:13px; margin-bottom:6px; }
+  .appr table { font-size:12.5px; }
+  .appr input { width:100%; margin:8px 0; padding:7px 10px; border-radius:4px; border:1px solid var(--line); background:var(--bg); color:var(--ink); font:inherit; font-size:12.5px; }
+  .appr .scopes { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+  .appr .sc { display:flex; align-items:center; gap:5px; background:var(--raised); border:1px solid var(--line); border-radius:4px; padding:4px 10px; font-size:12.5px; cursor:pointer; }
+  .appr .sc:has(input:checked) { border-color:var(--lime); color:var(--lime); }
+  .appr .sc.off { opacity:.4; cursor:default; }
+  .appr .scopes input { width:auto; margin:0; accent-color:var(--lime); }
+  .appr .btns { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .appr .ok { background:var(--lime); color:#fff; border:0; border-radius:4px; padding:6px 12px; font-weight:900; font-size:12.5px; }
+  .appr .no { background:transparent; border:1px solid var(--line); color:var(--muted); border-radius:4px; padding:6px 12px; font-weight:700; font-size:12.5px; }
+  .appr .res { font-size:12.5px; color:var(--muted); }
+  .adj { border:1px solid var(--lime); background:#F0F6FD; border-radius:4px; padding:12px 16px; display:flex; flex-direction:column; gap:6px; }
+  .adj .h { display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap; }
+  .adj .h b { color:var(--lime); }
+  .adj .h button { background:none; border:1px solid var(--line); color:var(--muted); border-radius:4px; font-size:12px; padding:3px 10px; }
+  .adj .rows { display:flex; flex-wrap:wrap; gap:6px; font-size:12.5px; }
+  .adj .rows span { background:var(--raised); border-radius:4px; padding:2px 9px; }
+  .wk .adjline { font-size:12.5px; color:var(--lime); font-weight:700; }
+
+  /* ---------- 글꼴과 카드 덧입히기: 제목 도현체, 버튼·칩 주아체, 카드 그림자 ---------- */
+  body { font-family:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; }
+  .brand b { font-family:var(--title); font-weight:400; font-size:24px; letter-spacing:.06em; color:var(--acc); }
+  .logo { background:var(--acc); color:#fff; font-family:var(--title); font-weight:400; font-size:18px; border-radius:4px; }
+  .weeknav .t b { font-family:var(--title); font-weight:400; font-size:34px; }
+  .weeknav .t span, h2 { font-family:var(--fun); font-weight:400; letter-spacing:.02em; }
+  h2 { font-size:15px; color:var(--ink); }
+  .stat .v { font-family:var(--title); font-weight:400; font-size:32px; }
+  .stat, .wk, .card { box-shadow:0 1.6px 3.6px rgba(0,0,0,.13), 0 .3px .9px rgba(0,0,0,.11); border-color:transparent; }
+  .stat, .wk, .card, .fb { border-color:var(--line); }
+  .wk .d b { font-family:var(--title); font-weight:400; font-size:26px; }
+  .wk .name { font-family:var(--fun); font-weight:400; font-size:17px; }
+  .wk.sel { box-shadow:0 0 0 2px var(--acc) inset, 0 6px 16px rgba(0,103,184,.15); }
+  .dhead h3 { font-family:var(--title); font-weight:400; font-size:26px; }
+  .chat .head b { font-family:var(--title); font-weight:400; font-size:19px; }
+  .chat .head .av, .msg .av { background:var(--acc); color:#fff; font-family:var(--title); font-weight:400; }
+  .send, .debug, .askthis, .appr .ok, .save button, .chips button, .ctxchip, .pill, .st, .weeknav button, .clear, .badge { font-family:var(--fun); font-weight:400; }
+  .send { font-size:16px; }
+  .debug { box-shadow:0 4px 12px rgba(0,103,184,.35); }
+  .askthis { font-size:15px; }
+  .msg.me { font-weight:500; }
+  .msg.bot { background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .welcome { background:var(--acc-d); color:#243A5E; }
+  .welcome b { color:#005A9E; }
+  .pill { background:var(--raised); }
+  .pill b { color:var(--ink); }
+  .top { box-shadow:0 1px 0 var(--line); }
+  .wk.today .d b { color:var(--acc); }
+  textarea { background:#fff; }
+  .modelbar select { background:#fff; }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">T</div><div><b>TEMPO</b> <span>마라톤 훈련 조정 코치</span></div></div>
+  <div class="meta">
+    <span class="pill" id="today">불러오는 중</span>
+    <span class="pill" id="goal" hidden></span>
+    <a class="debug" href="/debug" target="_blank" rel="noopener">⚙ 확인용 화면 <small>평가 질문 · 근거 · 실행 과정 ↗</small></a>
+  </div>
+</header>
+
+<div class="app">
+  <!-- 왼쪽: 코치 채팅 -->
+  <section class="chat" aria-label="코치와 대화">
+    <div class="head">
+      <div class="av">T</div>
+      <div><b>코치 TEMPO</b><span>기록 · 훈련 이론 · 계획 담당이 함께 답합니다</span></div>
+      <button class="clear" id="clear">대화 지우기</button>
+    </div>
+    <div class="modelbar" title="Bedrock 사용 한도가 찬 모델은 다른 모델이나 리전(global 포함)으로 바꿔 쓰세요">
+      <label>모델 <select id="msel"></select></label>
+      <label>리전 <select id="rsel"></select></label>
+    </div>
+    <div class="thread" id="thread">
+      <div class="welcome" id="welcome"><b>무엇이든 물어보세요.</b><br>가운데 훈련 카드를 누르면 그 훈련을 주제로 대화할 수 있고,
+        답변을 그날의 <b>코치 피드백</b>으로 저장할 수 있습니다. 복합 질문은 1분 안팎 걸립니다.</div>
+    </div>
+    <div class="compose">
+      <div class="ctxchip" id="ctxchip" hidden><span id="ctxtext"></span><button id="ctxoff" aria-label="훈련 선택 해제">✕</button></div>
+      <div class="chips" id="chips"></div>
+      <div class="preview" id="preview" hidden><img id="pimg" alt="첨부한 이미지"><video id="pvid" muted playsinline hidden></video><span id="ptxt">기록 화면·계획표 캡처를 함께 보냅니다</span><button id="pdel" aria-label="첨부 취소">✕</button></div>
+      <div class="inrow">
+        <button class="attach" id="attach" title="이미지 첨부 (시계·앱 기록 화면, 계획표 사진)" aria-label="이미지 첨부">📎</button>
+        <input type="file" id="file" accept="image/png,image/jpeg,image/webp,image/gif,video/mp4,video/quicktime,video/webm" hidden>
+        <textarea id="q" rows="2" placeholder="코치에게 질문하기"></textarea>
+        <button class="send" id="send">보내기</button>
+      </div>
+      <span class="kbd">Ctrl + Enter 로 보내기 · 📎 로 기록 화면 캡처나 달리는 영상(옆에서 찍은 5~10초, 30MB 이하)을 첨부할 수 있습니다</span>
+    </div>
+  </section>
+
+  <div class="gutter" id="g1" role="separator" aria-orientation="vertical" aria-label="채팅 너비 조절" tabindex="0" title="끌어서 너비 조절 · 두 번 누르면 기본값"></div>
+
+  <div class="work">
+    <!-- 가운데: 주간 훈련 -->
+    <section class="col main" aria-label="주간 훈련">
+      <div class="weeknav">
+        <div class="t"><span id="wsub"></span><b class="n" id="wtitle">–</b></div>
+        <div class="btns">
+          <button id="prev" aria-label="이전 주">‹</button>
+          <button id="now">이번 주</button>
+          <button id="next" aria-label="다음 주">›</button>
+        </div>
+      </div>
+      <div class="stats" id="stats"></div>
+      <div class="adj" id="adj" hidden></div>
+      <div class="sec"><h2>훈련</h2><span class="hint">카드를 누르면 상세가 열리고 그 훈련을 주제로 물을 수 있습니다</span></div>
+      <div class="days" id="days"></div>
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <div class="gutter" id="g2" role="separator" aria-orientation="vertical" aria-label="상세 너비 조절" tabindex="0" title="끌어서 너비 조절 · 두 번 누르면 기본값"></div>
+
+    <!-- 오른쪽: 선택한 날 -->
+    <aside class="col detail" aria-label="선택한 날의 상세" id="detail">
+      <p class="empty">훈련 카드를 선택하면 여기에 상세와 코치 피드백이 표시됩니다.</p>
+    </aside>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+  ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const STATUS = { completed:"완료", missed:"놓침", upcoming:"예정" };
+const GENERAL = ["요즘 나 어때?", "지난 4주 주간 거리 추이 알려줘", "테이퍼링은 대회 몇 주 전부터 어떻게 줄여야 해?",
+  "풀코스를 3시간 30분에 뛰려면 km당 페이스가 얼마야?"];
+/* 훈련 유형별 대표 강도(존)와 프로필 모양. [길이 비중, 존] 의 나열이며, 실제 세부 구성이 아니라 유형을 보여 주는 그림이다. */
+const ZONE_NAME = { 1:"회복", 2:"존2 지구력", 3:"마라톤 페이스", 4:"역치", 5:"VO2max" };
+const TYPE_ZONE = { easy:2, easy_strides:2, long:3, tempo:4, cruise:4, hills:5, interval:5, race:3 };
+const rep = (n, a) => Array.from({ length:n }, () => a).flat();
+const PROFILE = {
+  easy: [[1,1],[8,2],[1,1]],
+  easy_strides: [[1,1],[7,2], ...rep(4, [[.3,5],[.4,2]]), [1,1]],
+  long: [[1,1],[9,2],[3,3],[1,1]],
+  tempo: [[2,2],[5,4],[2,2]],
+  cruise: [[2,2], ...rep(3, [[2,4],[.6,2]]), [1.4,2]],
+  interval: [[2,2], ...rep(5, [[1,5],[.7,1]]), [1.3,2]],
+  hills: [[2,2], ...rep(6, [[.5,5],[.7,1]]), [1.3,2]],
+  race: [[.5,2],[12,3],[1,4]],
+};
+const zc = (z) => `var(--z${z})`;
+function profileHtml(type, big) {
+  const segs = PROFILE[type];
+  if (!segs) return "<div></div>";
+  return `<div class="prof ${big ? "big" : ""}" aria-hidden="true">` + segs.map(([w, z]) =>
+    `<span style="flex:${w};height:${18 + z * 16}%;background:${zc(z)}"></span>`).join("") + "</div>";
+}
+let WEEK = null, SEL = null, BUSY = false, ADJ = {}, IMG = null, VID = null;
+const pd = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const md = (s) => { const d = pd(s); return `${d.getMonth() + 1}/${d.getDate()}`; };
+const mdk = (s) => { const d = pd(s); return `${d.getMonth() + 1}월 ${d.getDate()}일`; };
+
+/* 답변에 쓰이는 마크다운(제목, 굵게, 목록, 표, 인용, 구분선)만 처리한다. 먼저 전체를 이스케이프한다. */
+function inline(s) {
+  return esc(s).replace(/`([^`]+)`/g, "<code>$1</code>").replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+}
+function mdToHtml(text) {
+  const lines = String(text ?? "").split(/\r?\n/), out = [];
+  const cells = (ln) => ln.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
+  let i = 0;
+  while (i < lines.length) {
+    const ln = lines[i];
+    if (!ln.trim()) { i++; continue; }
+    if (/^\s*(-{3,}|\*{3,})\s*$/.test(ln)) { out.push("<hr>"); i++; continue; }
+    const h = ln.match(/^(#{1,4})\s+(.*)$/);
+    if (h) { const n = Math.min(h[1].length + 2, 5); out.push(`<h${n}>${inline(h[2])}</h${n}>`); i++; continue; }
+    if (/^\s*\|/.test(ln) && i + 1 < lines.length && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1])) {
+      const head = cells(ln); i += 2; const rows = [];
+      while (i < lines.length && /^\s*\|/.test(lines[i])) { rows.push(cells(lines[i])); i++; }
+      out.push('<div class="tablewrap"><table><thead><tr>' + head.map((c) => `<th>${inline(c)}</th>`).join("") +
+        "</tr></thead><tbody>" + rows.map((r) => "<tr>" + r.map((c) => `<td>${inline(c)}</td>`).join("") + "</tr>").join("") +
+        "</tbody></table></div>");
+      continue;
+    }
+    if (/^\s*>/.test(ln)) {
+      const buf = [];
+      while (i < lines.length && /^\s*>/.test(lines[i])) { buf.push(lines[i].replace(/^\s*>\s?/, "")); i++; }
+      out.push(`<blockquote>${buf.map(inline).join("<br>")}</blockquote>`); continue;
+    }
+    const isUl = (s) => /^\s*[-*]\s+/.test(s), isOl = (s) => /^\s*\d+[.)]\s+/.test(s);
+    if (isUl(ln) || isOl(ln)) {
+      const ordered = isOl(ln), test = ordered ? isOl : isUl, buf = [];
+      while (i < lines.length && (test(lines[i]) || /^\s{2,}\S/.test(lines[i]))) {
+        if (test(lines[i])) buf.push(lines[i].replace(/^\s*([-*]|\d+[.)])\s+/, ""));
+        else buf[buf.length - 1] += " " + lines[i].trim();
+        i++;
+      }
+      const tag = ordered ? "ol" : "ul";
+      out.push(`<${tag}>${buf.map((b) => `<li>${inline(b)}</li>`).join("")}</${tag}>`); continue;
+    }
+    const para = [];
+    while (i < lines.length && lines[i].trim() && !/^(#{1,4})\s|^\s*\||^\s*>|^\s*[-*]\s+|^\s*\d+[.)]\s+/.test(lines[i])) { para.push(lines[i]); i++; }
+    out.push(`<p>${para.map(inline).join("<br>")}</p>`);
+  }
+  return out.join("");
+}
+
+
+/* ---------- 가운데: 주간 ---------- */
+async function loadWeek(start) {
+  const res = await fetch("/week" + (start ? `?start=${start}` : ""));
+  WEEK = await res.json();
+  renderWeek();
+}
+function renderWeek() {
+  const w = WEEK, s = w.stats, p = w.profile;
+  $("today").innerHTML = `기준일 <b>${mdk(w.today)}</b> · ${esc(p.runner_id)}`;
+  const dday = Math.round((pd(p.goal.race_date) - pd(w.today)) / 86400000);
+  $("goal").hidden = false;
+  $("goal").innerHTML = `<i>D-${dday}</i>${esc(p.goal.race)} · 목표 <b class="n">${esc(p.goal.target_time)}</b> · <b class="n">${esc(p.goal.target_pace_per_km)}</b>/km`;
+  $("wtitle").textContent = `${md(w.week_start)} – ${md(w.week_end)}`;
+  $("wsub").textContent = w.is_current_week ? "이번 주" : (w.week_end < w.today ? "지난 주" : "다음 주");
+  $("prev").disabled = !w.has_prev; $("next").disabled = !w.has_next; $("now").disabled = w.is_current_week;
+  const over = s.planned_km > w.weekly_limit_km;
+  const pct = s.planned_km ? Math.min(100, Math.round(s.actual_km / s.planned_km * 100)) : 0;
+  $("stats").innerHTML =
+    `<div class="stat"><div class="l">계획 거리</div><div class="v n ${over ? "warn" : ""}">${s.planned_km}<small>km</small></div></div>` +
+    `<div class="stat"><div class="l">실제 달린 거리</div><div class="v n">${s.actual_km}<small>km · ${pct}%</small></div><div class="bar"><span style="width:${pct}%"></span></div></div>` +
+    `<div class="stat"><div class="l">수행 / 계획</div><div class="v n ${s.missed_sessions ? "warn" : ""}">${s.completed_sessions}<small>/ ${s.planned_sessions}회${s.missed_sessions ? ` · 놓침 ${s.missed_sessions}` : ""}</small></div></div>` +
+    `<div class="stat"><div class="l">주간 거리 한도</div><div class="v n">${w.weekly_limit_km}<small>km</small></div></div>`;
+  /* 승인한 조정안 (HITL 로 사용자가 승인한 것만 여기에 보인다) */
+  const adj = w.adjusted;
+  ADJ = {};
+  if (adj) for (const r of adj.days) ADJ[r.date] = r;
+  $("adj").hidden = !adj;
+  if (adj) {
+    $("adj").innerHTML = `<div class="h"><span><b>✔ 승인한 조정안</b> · 주간 <b class="n">${adj.total_km}km</b> (원래 계획 ${s.planned_km}km) · ${esc(adj.approved_at)} 승인</span>` +
+      `<button id="adjdel">원래 계획으로 되돌리기</button></div>` +
+      `<div class="rows">${adj.days.map((r) => `<span>${r.weekday} ${esc(r.workout)} <b class="n">${r.distance_km}km</b></span>`).join("")}</div>`;
+    $("adjdel").addEventListener("click", async () => { await fetch(`/adjusted/${w.week_start}`, { method:"DELETE" }); await loadWeek(w.week_start); });
+  }
+  $("days").innerHTML = w.days.map(cardHtml).join("");
+  for (const el of $("days").querySelectorAll(".wk")) el.addEventListener("click", () => select(el.dataset.date));
+  if (SEL) { const d = w.days.find((x) => x.date === SEL.date); if (d) { SEL = d; renderDetail(); } }
+  markSel();
+}
+function cardHtml(d) {
+  const p = d.planned, a = d.activity, c = d.condition, fb = d.feedback || [];
+  const day = `<div class="d"><b class="n">${pd(d.date).getDate()}</b><span>${d.weekday}</span></div>`;
+  const adjr = ADJ[d.date];
+  const note = (adjr ? `<div class="adjline">→ 조정안: ${esc(adjr.workout)} ${adjr.distance_km}km</div>` : "") +
+    (fb.length ? `<div class="note"><i>코치</i><span>${esc(fb[fb.length - 1].summary)}</span></div>` : "");
+  const cond = c ? `<span>안정시 심박 <b class="n">${c.resting_hr}</b></span><span>수면 <b class="n">${c.sleep_hours}h</b></span>` : "";
+  const today = d.is_today ? " today" : "";
+  if (!p) {
+    return `<button class="wk rest${today}" data-date="${d.date}">${day}<div class="info">
+      <div class="name">휴식${d.is_today ? ' <span class="st today">오늘</span>' : ""}</div>
+      ${cond ? `<div class="facts">${cond}</div>` : ""}${note}</div><div></div></button>`;
+  }
+  const st = d.is_today ? '<span class="st today">오늘</span>' : `<span class="st ${d.status}">${STATUS[d.status] || ""}</span>`;
+  const facts = a
+    ? `<span>실제 <b class="n">${a.distance_km}km</b></span><span>페이스 <b class="n">${esc(a.avg_pace_per_km)}</b></span><span>평균 심박 <b class="n">${a.avg_hr}</b></span>`
+    : (d.status === "missed" ? `<span>${esc(p.missed_reason || "미수행")}</span>` : `<span>${esc(p.detail)}</span>`);
+  return `<button class="wk${today}" data-date="${d.date}" style="--c:${zc(TYPE_ZONE[p.type] || 1)}">${day}<div class="info">
+    <div class="name">${esc(p.name)} <span class="km n">${p.planned_distance_km}km</span>${st}</div>
+    <div class="facts">${facts}${cond}</div>${note}</div>${profileHtml(p.type)}</button>`;
+}
+function markSel() {
+  for (const el of $("days").querySelectorAll(".wk")) el.classList.toggle("sel", !!SEL && el.dataset.date === SEL.date);
+}
+
+/* ---------- 오른쪽: 선택한 날 ---------- */
+function select(date) {
+  SEL = WEEK.days.find((x) => x.date === date);
+  markSel(); renderDetail(); renderCompose();
+}
+function renderDetail() {
+  const d = SEL, el = $("detail");
+  if (!d) { el.innerHTML = '<p class="empty">훈련 카드를 선택하면 여기에 상세와 코치 피드백이 표시됩니다.</p>'; return; }
+  const p = d.planned, a = d.activity, c = d.condition, base = WEEK.profile.heart_rate.baseline_resting_hr;
+  const z = p ? (TYPE_ZONE[p.type] || 1) : 1;
+  const cell = (l, v, warn) => `<div><div class="l">${l}</div><div class="v n ${warn ? "warn" : ""}">${v}</div></div>`;
+  let run = "", cond = "";
+  if (a) run = cell("실제 거리", `${a.distance_km}km`) + cell("시간", esc(a.duration)) + cell("평균 페이스", esc(a.avg_pace_per_km)) +
+    cell("평균 · 최대 심박", `${a.avg_hr} · ${a.max_hr}`);
+  if (c) cond = cell("안정시 심박", `${c.resting_hr}<small> 평소 ${base}</small>`, c.resting_hr - base >= 5) +
+    cell("수면", `${c.sleep_hours}h`, c.sleep_hours < 6) + cell("피로도", `${c.fatigue_1to5}/5`, c.fatigue_1to5 >= 4);
+  const fb = d.feedback || [];
+  el.innerHTML = `
+    <div class="card dhead" style="--c:${zc(z)}">
+      <span class="ty">${p ? `${esc(STATUS[d.status] || "")} · ${p.recovery_week ? "회복주" : "훈련주"} · ${ZONE_NAME[z]}` : "휴식"}</span>
+      <h3>${p ? `${esc(p.name)} <span class="n">${p.planned_distance_km}km</span>` : "휴식일"}</h3>
+      <p>${mdk(d.date)} ${d.weekday}요일${p ? " · " + esc(p.detail) : ""}</p>
+      ${p ? `<div style="margin-top:12px">${profileHtml(p.type, true)}</div>` : ""}
+    </div>
+    ${ADJ[d.date] ? `<div class="adj"><div class="h"><span><b>✔ 승인한 조정안</b></span></div><div class="rows"><span>${esc(ADJ[d.date].workout)} <b class="n">${ADJ[d.date].distance_km}km</b></span></div></div>` : ""}
+    ${run ? `<div class="sec"><h2>기록</h2></div><div class="grid2">${run}</div>` : ""}
+    ${cond ? `<div class="sec"><h2>그날 컨디션</h2></div><div class="grid2">${cond}</div>` : ""}
+    <button class="askthis" id="askthis">💬 이 훈련에 대해 코치에게 묻기</button>
+    <div class="sec"><h2>코치 피드백</h2><span class="hint">${fb.length}건</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px">${fb.length ? fb.slice().reverse().map((f, i) =>
+      `<div class="fb"><div class="q">Q. ${esc(f.question)}</div><div class="answer">${mdToHtml(f.answer)}</div>
+        <div class="meta"><span>${esc(f.saved_at)} 저장</span>${i === 0 ? '<button data-del="1">가장 최근 피드백 삭제</button>' : ""}</div></div>`).join("")
+      : '<p class="empty">아직 저장된 피드백이 없습니다. 왼쪽 대화에서 답변을 받은 뒤 "코치 피드백으로 저장"을 누르세요.</p>'}</div>`;
+  $("askthis").addEventListener("click", () => { renderCompose(); $("q").focus(); });
+  const del = el.querySelector("[data-del]");
+  if (del) del.addEventListener("click", async () => { await fetch(`/feedback/${d.date}`, { method:"DELETE" }); await loadWeek(WEEK.week_start); });
+}
+
+/* ---------- 왼쪽: 채팅 ---------- */
+/* 받침 유무에 맞는 조사를 붙인다. josa("인터벌", "은", "는") -> "인터벌은" */
+function josa(word, withFinal, withoutFinal) {
+  const code = word.charCodeAt(word.length - 1) - 0xac00;
+  const hasFinal = code >= 0 && code <= 11171 && code % 28 !== 0;
+  return word + (hasFinal ? withFinal : withoutFinal);
+}
+function suggestions(d) {
+  if (!d) return GENERAL;
+  const p = d.planned, day = `${mdk(d.date)}(${d.weekday})`;
+  if (!p) return ["요즘 나 어때?", "휴식일에는 무엇을 하는 게 좋아?"];
+  if (d.status === "missed") return [
+    `${day} ${p.name} ${p.planned_distance_km}km를 못 뛰었어. 이번 주 계획을 어떻게 조정하면 좋을까?`,
+    `${josa(p.name, "을", "를")} 놓쳤을 때는 어떻게 하는 게 원칙이야?`];
+  if (d.status === "upcoming") return [
+    p.is_hard ? `${day}에 ${josa(p.name, "이", "가")} 잡혀 있는데 요즘 잠을 잘 못 잤어. 그대로 해도 될까?`
+              : `${day} ${p.name} ${p.planned_distance_km}km는 어떤 강도와 페이스로 뛰어야 해?`,
+    `${josa(p.name, "은", "는")} 왜 하는 훈련이야?`];
+  return [`${day} ${p.name} 기록을 계획과 비교해서 평가해줘.`, `${josa(p.name, "은", "는")} 왜 하는 훈련이야?`];
+}
+const ctxLabel = (d) => d.planned ? `${md(d.date)}(${d.weekday}) ${d.planned.name} ${d.planned.planned_distance_km}km` : `${md(d.date)}(${d.weekday}) 휴식일`;
+function renderCompose() {
+  $("ctxchip").hidden = !SEL;
+  if (SEL) $("ctxtext").textContent = `훈련 주제: ${ctxLabel(SEL)}`;
+  $("chips").innerHTML = "";
+  for (const q of suggestions(SEL)) {
+    const b = document.createElement("button"); b.textContent = q;
+    b.addEventListener("click", () => { $("q").value = q; $("q").focus(); });
+    $("chips").appendChild(b);
+  }
+}
+function addMsg(cls, html) {
+  $("welcome").hidden = true;
+  const div = document.createElement("div"); div.className = "msg " + cls; div.innerHTML = html;
+  $("thread").appendChild(div); $("thread").scrollTop = $("thread").scrollHeight;
+  return div;
+}
+function resultHtml(data) {
+  const meta = data.meta || {}, b = [];
+  if (meta.blocked) b.push(`<span class="badge warn">입력 가드레일 차단 · ${esc(meta.rule_id)} ${esc(meta.category)}</span>`);
+  else b.push('<span class="badge">입력 가드레일 통과</span>');
+  const og = meta.output_guard;
+  if (og && og.proposes_plan) {
+    const totals = Object.values(og.weekly_totals_km || {}).join(", ");
+    const note = { ok:"한도 이내", rewritten:"한도 초과로 고쳐 씀", blocked:"한도 초과로 계획 차단" }[og.status] || og.status;
+    b.push(`<span class="badge ${og.status === "ok" ? "" : "warn"}">주간 ${esc(totals)}km / 한도 ${og.limit_km}km · ${note}</span>`);
+  }
+  if (meta.image_attached) b.push('<span class="badge">이미지 판독</span>');
+  if (meta.video_attached) b.push('<span class="badge">영상 자세 관찰</span>');
+  if ((meta.tools || []).includes("get_coach_feedback")) b.push('<span class="badge">지난 피드백 기억</span>');
+  (meta.agents || []).forEach((a) => b.push(`<span class="badge plain">${esc(a)}</span>`));
+  if (meta.latency_s != null) b.push(`<span class="badge plain">${meta.latency_s}초</span>`);
+  if (meta.model) b.push(`<span class="badge plain">${esc(meta.model.replace(/^(us|global)\.(anthropic|amazon)\./, ""))} · ${esc(meta.region)}</span>`);
+  const ctx = data.contexts || [], tr = data.trace || [];
+  return `<div class="badges">${b.join("")}</div><div class="answer">${mdToHtml(data.answer)}</div>
+    <details><summary>근거 문서 (${ctx.length})</summary>${ctx.length ? ctx.map((c) =>
+      `<div class="item"><div class="head"><b>${esc(c.doc_id)}</b><span>${esc(c.source || "")}</span></div><pre>${esc(c.text)}</pre></div>`).join("")
+      : '<p class="empty" style="margin-top:6px">이 답변에는 문서 검색이 쓰이지 않았습니다.</p>'}</details>
+    <details><summary>실행 과정 (${tr.length}단계)</summary>${tr.map((s, n) =>
+      `<div class="item"><div class="head"><span>${n + 1}</span><b>${esc(s.step)}</b><span>${esc(s.agent || "")}</span>` +
+      `${s.latency_s != null ? `<span>${s.latency_s}초</span>` : ""}</div><pre>${esc(s.output)}</pre></div>`).join("")}</details>`;
+}
+async function send() {
+  const typed = $("q").value.trim();
+  if (!typed || BUSY) return;
+  const d = SEL, p = d && d.planned;
+  /* 훈련을 골랐으면 그 훈련의 날짜와 내용을 질문 앞에 붙여 보낸다. /query 의 요청 형식은 그대로다. */
+  /* 고른 훈련 카드를 질문 앞에 붙인다. 기준일과의 관계(오늘·내일·n일 뒤·n일 전)도 적어 모델이 날짜를 헷갈리지 않게 한다 */
+  const rel = !d ? "" : (() => { const n = Math.round((pd(d.date) - pd(WEEK.today)) / 86400000);
+    return n === 0 ? "오늘" : n === 1 ? "내일" : n === -1 ? "어제" : n > 0 ? `${n}일 뒤` : `${-n}일 전`; })();
+  const prefix = !d ? "" : p ? `[훈련 카드: ${d.date}(${d.weekday}, ${rel}) ${p.name} ${p.planned_distance_km}km, 상태: ${STATUS[d.status]}] `
+                             : `[훈련 카드: ${d.date}(${d.weekday}, ${rel}) 휴식일] `;
+  const image = IMG, video = VID;
+  addMsg("me", (d ? `<span class="ctx">${esc(ctxLabel(d))}</span>` : "") + (image ? `<img src="${image}" alt="첨부 이미지">` : "") +
+    (video ? '<span class="ctx">🎬 영상 첨부 · 프레임을 뽑아 자세를 관찰합니다</span>' : "") + esc(typed));
+  $("q").value = ""; clearImage(); BUSY = true; $("send").disabled = true;
+  const wait = addMsg("wait", '<span class="dots"><i></i><i></i><i></i></span> <span>담당 에이전트들이 확인 중 0초</span>');
+  const started = Date.now();
+  const timer = setInterval(() => { wait.lastChild.textContent = `담당 에이전트들이 확인 중 ${Math.round((Date.now() - started) / 1000)}초`; }, 1000);
+  try {
+    const res = await fetch("/query", { method:"POST", headers:{ "Content-Type":"application/json" }, body:JSON.stringify({ question:prefix + typed, ...(image ? { image } : {}), ...(video ? { video } : {}), ...choice() }) });
+    const data = await res.json();
+    if (res.status === 429) { $("msel").classList.add("warn"); $("rsel").classList.add("warn"); }
+    if (!res.ok) throw new Error(data.detail || res.statusText);
+    $("msel").classList.remove("warn"); $("rsel").classList.remove("warn");
+    wait.remove();
+    const msg = addMsg("bot", resultHtml(data) + approvalHtml(data.meta && data.meta.approval, d) + (d && !(data.meta && data.meta.blocked)
+      ? `<div class="save"><button>${esc(md(d.date))} 코치 피드백으로 저장</button><span></span></div>` : ""));
+    bindApproval(msg, data.meta && data.meta.approval, d);
+    const btn = msg.querySelector(".save button");
+    if (btn) btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      const r = await fetch("/feedback", { method:"POST", headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({ date:d.date, question:typed, answer:data.answer }) });
+      if (r.ok) { btn.textContent = "저장됨 ✓"; btn.classList.add("ok"); await loadWeek(WEEK.week_start); }
+      else { btn.disabled = false; msg.querySelector(".save span").textContent = "저장하지 못했습니다"; }
+    });
+  } catch (e) {
+    wait.remove(); addMsg("bot", `<span class="badge warn">오류</span> ${esc(e.message)}`);
+  } finally { clearInterval(timer); BUSY = false; $("send").disabled = false; }
+}
+
+/* ---------- 조정안 승인 (HITL) ---------- */
+/* 답변에 주간 조정안이 있으면 서버의 승인 그래프가 멈춰서 기다린다. 승인·거절을 보내면 그래프가 이어서 실행된다. */
+/* 반영 범위: 이 날만 (카드를 눌러 물었을 때 기본) / 이번 주 전체 / 다음 주까지 이어서 조정 */
+function approvalHtml(ap, d) {
+  if (!ap) return "";
+  const dates = Object.values(ap.weeks).flat().map((r) => r.date);
+  const dayOk = !!d && dates.includes(d.date);
+  const rows = Object.entries(ap.weeks).map(([monday, days]) =>
+    `<tr><td colspan="3"><b>${md(monday)} 주 · 반영 시 주간 ${ap.totals_km[monday]}km</b></td></tr>` +
+    days.map((r) => `<tr><td>${md(r.date)}(${r.weekday})</td><td>${esc(r.workout)}</td><td>${r.distance_km}km</td></tr>`).join("")).join("");
+  const name = "scope-" + ap.thread_id;
+  const opt = (v, label, on, off) => `<label class="sc${off ? " off" : ""}"><input type="radio" name="${name}" value="${v}"${on ? " checked" : ""}${off ? " disabled" : ""}> ${label}</label>`;
+  return `<div class="appr"><div class="t">✋ 이 조정안을 계획에 반영할까요?</div>
+    <div class="tablewrap"><table>${rows}</table></div>
+    <div class="scopes">
+      ${opt("day", dayOk ? `이 날만 (${md(d.date)})` : "이 날만", dayOk, !dayOk)}
+      ${opt("week", "이번 주 전체", !dayOk, false)}
+      ${opt("through_next", "다음 주까지 이어서 조정", false, false)}
+    </div>
+    <input class="cm" placeholder="의견 (선택) 예: 수요일은 회식이라 못 뛰어요">
+    <div class="btns"><button class="ok">승인하고 반영</button><button class="no">거절</button><span class="res"></span></div></div>`;
+}
+function bindApproval(msg, ap, d) {
+  if (!ap) return;
+  const box = msg.querySelector(".appr"), res = box.querySelector(".res");
+  const decide = async (approved) => {
+    for (const b of box.querySelectorAll("button, input")) b.disabled = true;
+    const scope = (box.querySelector("input[type=radio]:checked") || {}).value || "week";
+    if (approved && scope === "through_next") res.textContent = "이번 주를 반영하고 다음 주를 다시 짜는 중… (1분 안팎)";
+    const r = await fetch("/approve", { method:"POST", headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({ thread_id:ap.thread_id, approved, comment:box.querySelector(".cm").value, scope, day:d ? d.date : "", ...choice() }) });
+    const body = await r.json();
+    res.textContent = r.ok ? body.result : (body.detail || "처리하지 못했습니다");
+    if (r.ok && approved) await loadWeek((body.saved_weeks || [])[0] || Object.keys(ap.weeks)[0]);
+    if (r.ok && !approved) res.textContent += " 원하는 조건을 채팅으로 말하면 다시 짭니다.";
+    /* 다음 주까지: 에이전트가 다음 주를 다시 짠 답변과 새 승인 카드가 이어서 붙는다 */
+    if (r.ok && body.next) {
+      addMsg("me", `<span class="ctx">자동 요청 · 다음 주 이어서 조정</span>${esc(body.next.question)}`);
+      const m2 = addMsg("bot", resultHtml(body.next) + approvalHtml(body.next.meta && body.next.meta.approval, null));
+      bindApproval(m2, body.next.meta && body.next.meta.approval, null);
+    }
+  };
+  box.querySelector(".ok").addEventListener("click", () => decide(true));
+  box.querySelector(".no").addEventListener("click", () => decide(false));
+}
+
+/* ---------- 이미지 첨부 ---------- */
+/* 큰 사진은 긴 변 1600px JPEG 로 줄여 보낸다 (서버 한도 3.5MB). */
+function clearImage() {
+  IMG = null; VID = null; $("preview").hidden = true; $("file").value = "";
+  $("pimg").hidden = false; $("pvid").hidden = true; $("pvid").removeAttribute("src");
+  $("ptxt").textContent = "기록 화면·계획표 캡처를 함께 보냅니다";
+}
+$("attach").addEventListener("click", () => $("file").click());
+$("pdel").addEventListener("click", clearImage);
+$("file").addEventListener("change", () => {
+  const f = $("file").files[0]; if (!f) return;
+  /* 영상은 그대로 보내고 서버가 프레임을 뽑는다 (30MB 이하) */
+  if (f.type.startsWith("video/")) {
+    if (f.size > 30_000_000) { alert("영상이 너무 큽니다 (최대 30MB). 달리는 장면 5~10초만 잘라 올려 주세요."); $("file").value = ""; return; }
+    const rd = new FileReader();
+    rd.onload = () => {
+      IMG = null; VID = rd.result;
+      $("pimg").hidden = true; $("pvid").hidden = false; $("pvid").src = URL.createObjectURL(f);
+      $("ptxt").textContent = `달리는 영상 (${(f.size / 1e6).toFixed(1)}MB) · 프레임을 뽑아 자세를 관찰합니다`;
+      $("preview").hidden = false;
+    };
+    rd.readAsDataURL(f);
+    return;
+  }
+  VID = null; $("pimg").hidden = false; $("pvid").hidden = true;
+  const img = new Image(), url = URL.createObjectURL(f);
+  img.onload = () => {
+    const k = Math.min(1, 1600 / Math.max(img.width, img.height));
+    const c = document.createElement("canvas"); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    IMG = c.toDataURL("image/jpeg", 0.88); URL.revokeObjectURL(url);
+    $("pimg").src = IMG; $("preview").hidden = false;
+  };
+  img.src = url;
+});
+
+/* ---------- 모델·리전 선택 ---------- */
+/* Bedrock 일일 토큰 한도는 모델·리전마다 따로 찬다. 막히면(429) 여기서 바꿔 다시 보낸다. 고른 값은 이 브라우저에 기억한다. */
+let MODELS = null;
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+                set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+function choice() {
+  if (!MODELS) return {};
+  const model = $("msel").value, region = $("rsel").value, out = {};
+  if (model && model !== MODELS.default.model) out.model = model;
+  if (region && region !== MODELS.default.region) out.region = region;
+  return out;
+}
+function syncRegions() {
+  const m = MODELS.models.find((x) => x.id === $("msel").value);
+  for (const o of $("rsel").options) o.disabled = !!(m && m.regions && !m.regions.includes(o.value));
+  if ($("rsel").selectedOptions[0] && $("rsel").selectedOptions[0].disabled) $("rsel").value = m.regions[0];
+  /* 글자만 읽는 모델이면 첨부를 막는다 */
+  const vision = !m || m.vision;
+  $("attach").disabled = !vision; $("attach").title = vision ? "이미지·영상 첨부" : "이 모델은 이미지·영상을 읽지 못합니다";
+  if (!vision) clearImage();
+}
+async function loadModels() {
+  try { MODELS = await (await fetch("/models")).json(); } catch { return; }
+  $("msel").innerHTML = MODELS.models.map((m) => `<option value="${esc(m.id)}">${esc(m.label)}</option>`).join("");
+  $("rsel").innerHTML = MODELS.regions.map((r) => `<option value="${r}">${r}</option>`).join("");
+  const sm = store.get("tempo.model"), sr = store.get("tempo.region");
+  $("msel").value = MODELS.models.some((m) => m.id === sm) ? sm : MODELS.default.model;
+  $("rsel").value = MODELS.regions.includes(sr) ? sr : MODELS.default.region;
+  syncRegions();
+}
+$("msel").addEventListener("change", () => { syncRegions(); store.set("tempo.model", $("msel").value); store.set("tempo.region", $("rsel").value); $("msel").classList.remove("warn"); $("rsel").classList.remove("warn"); });
+$("rsel").addEventListener("change", () => { store.set("tempo.region", $("rsel").value); $("msel").classList.remove("warn"); $("rsel").classList.remove("warn"); });
+loadModels();
+
+/* ---------- 단 너비 조절 ---------- */
+/* 손잡이를 끌거나 (방향키로) 채팅·상세 단의 너비를 바꾼다. 가운데 단은 남는 폭을 쓴다. 고른 너비는 이 브라우저에 기억한다. */
+const PANES = {
+  g1: { v:"--chat-w", key:"tempo.chatW", def:400, min:300, max:720,
+        fromX: (x) => x - document.querySelector(".app").getBoundingClientRect().left },
+  g2: { v:"--detail-w", key:"tempo.detailW", def:360, min:280, max:640,
+        fromX: (x) => document.querySelector(".work").getBoundingClientRect().right - x },
+};
+function setPane(p, px) {
+  const room = window.innerWidth - 420;   /* 가운데 단이 적어도 이만큼은 남게 한다 */
+  const w = Math.round(Math.max(p.min, Math.min(p.max, room - (p === PANES.g1 ? cssPx(PANES.g2) : cssPx(PANES.g1)), px)));
+  document.documentElement.style.setProperty(p.v, w + "px");
+  return w;
+}
+const cssPx = (p) => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(p.v)) || p.def;
+for (const [id, p] of Object.entries(PANES)) {
+  const g = $(id), saved = parseFloat(store.get(p.key));
+  if (saved) setPane(p, saved);
+  g.addEventListener("pointerdown", (e) => {
+    e.preventDefault(); g.setPointerCapture(e.pointerId);
+    g.classList.add("drag"); document.body.classList.add("resizing");
+    const move = (ev) => setPane(p, p.fromX(ev.clientX));
+    const up = () => {
+      g.removeEventListener("pointermove", move); g.removeEventListener("pointerup", up); g.removeEventListener("pointercancel", up);
+      g.classList.remove("drag"); document.body.classList.remove("resizing");
+      store.set(p.key, String(cssPx(p)));
+    };
+    g.addEventListener("pointermove", move); g.addEventListener("pointerup", up); g.addEventListener("pointercancel", up);
+  });
+  g.addEventListener("dblclick", () => { setPane(p, p.def); store.set(p.key, String(p.def)); });
+  g.addEventListener("keydown", (e) => {
+    const step = e.shiftKey ? 60 : 20, dir = id === "g1" ? 1 : -1;   /* 상세 단은 오른쪽에 있어 방향이 반대 */
+    if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+      e.preventDefault();
+      store.set(p.key, String(setPane(p, cssPx(p) + (e.key === "ArrowRight" ? step : -step) * dir)));
+    }
+  });
+}
+
+/* ---------- 이벤트 ---------- */
+const shift = (days) => { const d = pd(WEEK.week_start); d.setDate(d.getDate() + days);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+$("prev").addEventListener("click", () => loadWeek(shift(-7)));
+$("next").addEventListener("click", () => loadWeek(shift(7)));
+$("now").addEventListener("click", () => loadWeek(""));
+$("send").addEventListener("click", send);
+$("q").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); send(); } });
+$("ctxoff").addEventListener("click", () => { SEL = null; markSel(); renderDetail(); renderCompose(); });
+$("clear").addEventListener("click", () => { for (const m of [...$("thread").querySelectorAll(".msg")]) m.remove(); $("welcome").hidden = false; });
+$("legend").innerHTML = [1, 2, 3, 4, 5].map((z) => `<span><i style="background:${zc(z)}"></i>Z${z} ${ZONE_NAME[z]}</span>`).join("") +
+  "<span>· 막대는 훈련 유형별 강도 모양입니다</span>";
+renderCompose();
+loadWeek("").then(() => { const t = WEEK.days.find((x) => x.is_today); if (t) select(t.date); })
+  .catch(() => { $("today").textContent = "서버에 연결할 수 없습니다"; });
+</script>
+</body>
+</html>
