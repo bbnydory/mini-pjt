@@ -52,7 +52,8 @@ Supervisor (agent.py) ── 한 번에 한 담당에게 위임하고 결과를 
 
 ## 실행 방법
 
-Python 3.14 와 Amazon Bedrock 자격 증명이 필요하다.
+Python 3.14 와 Amazon Bedrock 자격 증명이 필요하다. Bedrock 계정(us-east-1)에서 다음 모델 접근이 켜져 있어야 한다: `us.anthropic.claude-sonnet-4-6`(에이전트), `us.anthropic.claude-haiku-4-5-20251001-v1:0`(계획 추출), `us.anthropic.claude-sonnet-4-5-20250929-v1:0`(평가 심사), `amazon.titan-embed-text-v2:0`(임베딩). 다른 모델·리전을 쓰려면 `.env` 에 `RUNCOACH_MODEL`, `RUNCOACH_REGION` 을 넣거나 화면에서 고른다.
+깃허브에서 새로 받아 아래 순서대로 실행해 서버 기동, `/query` 응답, 평가 스크립트까지 동작하는 것을 확인했다 (2026-11-13).
 
 ```bash
 python -m venv .venv
@@ -100,8 +101,10 @@ Content-Type: application/json
   - 한도가 찼을 때: `--model global.anthropic.claude-sonnet-4-6 --judge-model global.anthropic.claude-sonnet-4-5-20250929-v1:0` 처럼 같은 모델의 global 프로필이나 `--region us-west-2` 로 바꾼다. 심사 모델은 1차와 같은 모델만 허용한다.
 - 컨디션 대조 평가: `python -m evaluation.run_condition` (같은 기록에서 컨디션만 바꾼 2개 조건 x 질문 2개 x 3회)
 - RAGAS: `python -m evaluation.run_ragas --round 2` (정답은 `evaluation/ragas_references.csv`, 한도가 찼으면 `--model` · `--region`)
+  - RAGAS 는 `requirements.txt` 에 넣지 않았다. Python 3.14 에서 의존 패키지 하나가 빌드되지 않아 따로 설치한다: `pip install --no-deps ragas==0.4.3` 후 `pip install tiktoken datasets appdirs langchain-openai instructor nest-asyncio networkx pillow`
 - 한 건만 터미널에서: `python -m src.agent "요즘 나 어때?"`
-- `./run.sh` 는 위 세 단계를 한 번에 실행한다.
+- `./run.sh` 는 위 세 단계를 한 번에 실행한다 (macOS·Linux·Git Bash).
+- 윈도우 명령 프롬프트의 `curl` 로 한글 질문을 보내면 인코딩이 깨져 `There was an error parsing the body` 가 날 수 있다. 웹 화면(`/`, `/debug`)을 쓰거나, 질문을 UTF-8 JSON 파일로 저장해 `curl -X POST localhost:8000/query -H "Content-Type: application/json" --data-binary @q.json` 으로 보낸다.
 
 ## RAGAS 평가 결과
 문서 검색이 쓰이는 5건(1, 2, 7, 8, 18번), 2차 평가 첫 회차 답변 기준 ([ragas_report.md](evaluation/ragas_report.md)).
